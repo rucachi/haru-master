@@ -365,6 +365,11 @@ class StudentApp {
    * @param {boolean} isMoreStudy '더 공부하기' 버튼 여부 (오답 문항 1순위 강제 포함)
    */
   async loadQuestions(isMoreStudy = false) {
+    const compEl = document.getElementById("completion-screen");
+    const gridEl = document.getElementById("study-workspace-grid");
+    if (compEl) compEl.style.display = "none";
+    if (gridEl) gridEl.style.display = "grid";
+
     const grade = this.config.grade;
     const subFilter = this.selectedSubject;
 
@@ -739,6 +744,9 @@ class StudentApp {
 
   nextQuestion() {
     this.currentIndex++;
+    if (this.clearCanvas) {
+      this.clearCanvas(); // 새 문제로 넘어갈 때 S펜 연습장 자동 정리
+    }
     this.renderCurrentQuestion();
     this.updateProgress();
   }
@@ -756,15 +764,15 @@ class StudentApp {
   }
 
   renderCompletionScreen() {
-    const main = document.getElementById("student-main-content");
-    if (!main) return;
+    const compEl = document.getElementById("completion-screen");
+    const gridEl = document.getElementById("study-workspace-grid");
 
     this.triggerConfetti();
 
     const rate = this.solvedCount > 0 ? Math.round((this.correctCount / this.solvedCount) * 100) : 100;
     const wrongCnt = this.solvedCount - this.correctCount;
 
-    main.innerHTML = `
+    const compHtml = `
       <div class="completion-celebration-card">
         <div class="celebration-trophy">🏆</div>
         <h2 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 8px;">
@@ -807,16 +815,30 @@ class StudentApp {
       </div>
     `;
 
+    if (compEl && gridEl) {
+      gridEl.style.display = "none";
+      compEl.style.display = "block";
+      compEl.innerHTML = compHtml;
+    } else {
+      const main = document.getElementById("student-main-content");
+      if (main) main.innerHTML = compHtml;
+    }
+
     // 더 공부하기 버튼 이벤트 바인딩
     document.getElementById("btn-study-more")?.addEventListener("click", () => {
+      if (compEl && gridEl) {
+        compEl.style.display = "none";
+        gridEl.style.display = "grid";
+        if (this.clearCanvas) this.clearCanvas();
+      }
       this.loadQuestions(true);
     });
   }
 
   renderEmptyState() {
-    const main = document.getElementById("student-main-content");
-    if (!main) return;
-    main.innerHTML = `
+    const compEl = document.getElementById("completion-screen");
+    const gridEl = document.getElementById("study-workspace-grid");
+    const emptyHtml = `
       <div class="completion-celebration-card" style="border-color: var(--border-glass);">
         <div style="font-size: 4rem; margin-bottom: 1rem;">🌴</div>
         <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">
@@ -830,6 +852,14 @@ class StudentApp {
         </button>
       </div>
     `;
+    if (compEl && gridEl) {
+      gridEl.style.display = "none";
+      compEl.style.display = "block";
+      compEl.innerHTML = emptyHtml;
+    } else {
+      const main = document.getElementById("student-main-content");
+      if (main) main.innerHTML = emptyHtml;
+    }
   }
 
   renderMath(text) {
@@ -877,58 +907,115 @@ class StudentApp {
     }, 2800);
   }
 
-  // --- S-Pen & 터치 풀이 연습장 엔진 ---
+  // --- [핵심] 좌우 2단 배치 S-Pen & 터치 풀이 연습장 엔진 ---
   initSPenScratchpad() {
-    const toggleBtn = document.getElementById("btn-toggle-spen");
-    const drawer = document.getElementById("spen-drawer");
     const canvas = document.getElementById("spen-canvas");
+    const canvasWrap = document.getElementById("scratchpad-canvas-wrap");
+    const gridEl = document.getElementById("study-workspace-grid");
+    const toggleBtn = document.getElementById("btn-toggle-spen");
+    const collapseBtn = document.getElementById("spen-collapse-btn");
     const clearBtn = document.getElementById("spen-clear-btn");
-    const closeBtn = document.getElementById("spen-close-btn");
+    const eraserBtn = document.getElementById("spen-eraser-btn");
+    const gridBtn = document.getElementById("spen-grid-btn");
+    const widthSelect = document.getElementById("spen-width-select");
 
-    if (!canvas || !drawer) return;
+    if (!canvas || !canvasWrap) return;
 
     const ctx = canvas.getContext("2d");
     let isDrawing = false;
     let currentColor = "#ffffff";
-    let currentWidth = 3;
+    let currentWidth = 4;
+    let isEraserMode = false;
 
+    // 캔버스 크기 자동 리사이징 및 버퍼 비율 맞춤
     const resizeCanvas = () => {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * (window.devicePixelRatio || 1);
-      canvas.height = rect.height * (window.devicePixelRatio || 1);
-      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+      const rect = canvasWrap.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      // 이전 그림 보존
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCtx.drawImage(canvas, 0, 0);
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
+
+      // 그림 복원
+      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width / dpr, tempCanvas.height / dpr);
     };
 
+    setTimeout(resizeCanvas, 150);
     window.addEventListener("resize", resizeCanvas);
 
-    toggleBtn?.addEventListener("click", () => {
-      drawer.classList.toggle("open");
-      toggleBtn.classList.toggle("active");
-      if (drawer.classList.contains("open")) {
-        setTimeout(resizeCanvas, 320);
-      }
-    });
-
-    closeBtn?.addEventListener("click", () => {
-      drawer.classList.remove("open");
-      toggleBtn?.classList.remove("active");
-    });
+    // 전체 지우기 함수 등록
+    this.clearCanvas = () => {
+      const rect = canvasWrap.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width * (window.devicePixelRatio || 1), rect.height * (window.devicePixelRatio || 1));
+    };
 
     clearBtn?.addEventListener("click", () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.clearCanvas();
+      this.showToast("연습장을 깨끗이 지웠습니다 🧹", "info");
     });
 
+    // 펜 색상 선택
     document.querySelectorAll(".color-dot").forEach(dot => {
       dot.addEventListener("click", () => {
         document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
         dot.classList.add("active");
         currentColor = dot.dataset.color || "#ffffff";
-        currentWidth = Number(dot.dataset.width || 3);
+        isEraserMode = false;
+        eraserBtn?.classList.remove("active");
+        ctx.globalCompositeOperation = "source-over";
       });
     });
 
+    // 지우개 모드 토글
+    eraserBtn?.addEventListener("click", () => {
+      isEraserMode = !isEraserMode;
+      eraserBtn.classList.toggle("active", isEraserMode);
+      if (isEraserMode) {
+        ctx.globalCompositeOperation = "destination-out";
+      } else {
+        ctx.globalCompositeOperation = "source-over";
+      }
+    });
+
+    // 선 굵기 조절
+    widthSelect?.addEventListener("change", (e) => {
+      currentWidth = Number(e.target.value) || 4;
+    });
+
+    // 모눈격자 토글
+    gridBtn?.addEventListener("click", () => {
+      canvasWrap.classList.toggle("grid-active");
+      gridBtn.classList.toggle("active");
+    });
+
+    // 화면 분할 접기/펼치기 토글 (우측 연습장 숨기기 / 펼치기)
+    const toggleSplitView = () => {
+      if (!gridEl) return;
+      const isFull = gridEl.classList.toggle("full-question");
+      if (toggleBtn) {
+        toggleBtn.classList.toggle("active", !isFull);
+        toggleBtn.innerHTML = isFull ? `<span>✏️</span> S펜 연습장 열기` : `<span>✏️</span> S펜 연습장`;
+      }
+      if (collapseBtn) {
+        collapseBtn.innerText = isFull ? `◀▶ 연습장 열기` : `◀▶ 접기`;
+      }
+      setTimeout(resizeCanvas, 320);
+    };
+
+    toggleBtn?.addEventListener("click", toggleSplitView);
+    collapseBtn?.addEventListener("click", toggleSplitView);
+
+    // 포인터 위치 계산
     const getPos = (e) => {
       const rect = canvas.getBoundingClientRect();
       return {
@@ -937,13 +1024,17 @@ class StudentApp {
       };
     };
 
+    // S-Pen 및 터치 드로잉 이벤트 리스너
     canvas.addEventListener("pointerdown", (e) => {
       isDrawing = true;
       const pos = getPos(e);
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
+
+      // 필압 감지 지원 (S-Pen pressure)
+      const pressureMultiplier = (e.pressure && e.pressure > 0) ? (e.pressure * 1.5) : 1;
+      ctx.lineWidth = isEraserMode ? currentWidth * 4 : currentWidth * pressureMultiplier;
       ctx.strokeStyle = currentColor;
-      ctx.lineWidth = currentWidth;
     });
 
     canvas.addEventListener("pointermove", (e) => {
