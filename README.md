@@ -54,6 +54,8 @@ python -m http.server 8000
 
 ## Firebase 보안 설정
 
+운영 설정과 프로젝트 식별자는 [FIREBASE_SETUP.md](FIREBASE_SETUP.md)에 정리되어 있습니다.
+
 학생 화면은 Firebase 익명 인증을 사용합니다. Firebase Console의 Authentication > Sign-in method에서 Anonymous를 활성화한 뒤, Firebase CLI에서 다음 명령으로 Firestore 규칙을 배포하세요:
 
 ```bash
