@@ -2,6 +2,7 @@ import { FIREBASE_CONFIG } from './firebase-config.js';
 
 let fbApp = null;
 let firestoreDb = null;
+let firebaseAuth = null;
 let fbDoc, fbSetDoc, fbGetDoc, fbGetDocs, fbCollection, fbDeleteDoc, fbWriteBatch;
 
 async function initCloudFirestore() {
@@ -9,6 +10,7 @@ async function initCloudFirestore() {
   try {
     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
     const firestoreModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const authModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
     fbDoc = firestoreModule.doc;
     fbSetDoc = firestoreModule.setDoc;
     fbGetDoc = firestoreModule.getDoc;
@@ -19,6 +21,12 @@ async function initCloudFirestore() {
 
     fbApp = initializeApp(FIREBASE_CONFIG);
     firestoreDb = firestoreModule.getFirestore(fbApp);
+    firebaseAuth = authModule.getAuth(fbApp);
+    try {
+      await authModule.signInAnonymously(firebaseAuth);
+    } catch (authError) {
+      console.warn("Firebase 익명 인증 실패 (로컬 모드로 계속합니다):", authError);
+    }
     return firestoreDb;
   } catch (err) {
     console.warn("Firebase CDN 로딩 실패 (로컬 모드로 실행):", err);

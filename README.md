@@ -52,6 +52,16 @@ python -m http.server 8000
 ```
 브라우저에서 `http://localhost:8000`으로 접속하면 즉시 대시보드가 열립니다.
 
+## Firebase 보안 설정
+
+학생 화면은 Firebase 익명 인증을 사용합니다. Firebase Console의 Authentication > Sign-in method에서 Anonymous를 활성화한 뒤, Firebase CLI에서 다음 명령으로 Firestore 규칙을 배포하세요:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+`firestore.rules`는 문항과 과제 쓰기를 관리자 custom claim(`admin: true`)으로 제한합니다. 관리자 문항 편집 기능을 원격 저장하려면 관리자 계정에 해당 claim을 발급해야 하며, 학생 복습 기록은 인증된 사용자만 접근할 수 있습니다.
+
 ---
 
 ## 📁 디렉토리 구조
