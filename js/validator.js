@@ -96,6 +96,11 @@ export class QuestionValidator {
       warnings.push({ field: "passage", message: "국어/영어 과목은 지문(Passage)이 필요한 문항인지 확인해 주세요." });
     }
 
+    // 9. 도형 및 과학 실험 다이어그램(image_url) 검사
+    if (q.image_url && String(q.image_url).trim().length > 0) {
+      passes.push({ field: "image_url", message: "도형/과학 실험 다이어그램 첨부 확인 완료 🖼️" });
+    }
+
     const isValid = errors.length === 0;
     const status = errors.length > 0 ? "error" : (warnings.length > 0 ? "warn" : "pass");
 

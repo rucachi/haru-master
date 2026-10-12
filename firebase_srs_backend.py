@@ -333,6 +333,11 @@ def upload_daily_assignments(
                     if passage and str(passage).strip():
                         question_doc["passage"] = str(passage).strip()
 
+                    # 도형 및 과학 실험 이미지/그림 (image_url 또는 Base64)
+                    image_url = q.get("image_url")
+                    if image_url and str(image_url).strip():
+                        question_doc["image_url"] = str(image_url).strip()
+
                     # Firestore 저장 (Questions 컬렉션)
                     if db is not None:
                         q_ref = db.collection("Questions").document(qid)

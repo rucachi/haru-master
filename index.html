@@ -172,6 +172,43 @@
             </div>
           </div>
 
+          <!-- 도형 및 과학 실험 그림 첨부 영역 -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>🖼️ 그림·도형·실험 장치 첨부 (선택)</span>
+              <div style="display: flex; gap: 5px;">
+                <button type="button" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 7px;" id="btn-preset-triangle">📐 직각삼각형</button>
+                <button type="button" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 7px;" id="btn-preset-science">🔬 실험 장치도</button>
+                <button type="button" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 7px;" id="btn-preset-graph">📈 좌표 그래프</button>
+              </div>
+            </div>
+
+            <!-- 이미지 업로드 & 붙여넣기 드롭존 -->
+            <div class="diagram-dropzone" id="diagram-dropzone" tabindex="0">
+              <div class="diagram-drop-idle" id="diagram-drop-idle">
+                <span style="font-size: 1.5rem;">📷</span>
+                <div style="font-weight: 600; font-size: 0.88rem; margin: 4px 0;">
+                  캡처 후 <strong>Ctrl + V</strong> 로 바로 붙여넣기 or 이미지 파일 드래그
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">
+                  클릭하여 이미지 파일 선택 (.png, .jpg, .svg, .webp)
+                </div>
+              </div>
+
+              <!-- 이미지 미리보기 박스 -->
+              <div class="diagram-preview-box" id="diagram-preview-box" style="display: none;">
+                <img id="diagram-preview-img" src="" alt="도형 및 과학 실험 그림 미리보기">
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                  <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 10px; color: var(--accent-rose);" id="btn-remove-diagram">
+                    ✕ 그림 삭제
+                  </button>
+                </div>
+              </div>
+            </div>
+            <input type="file" id="diagram-file-input" accept="image/*" style="display: none;">
+            <input type="hidden" id="input-image-url" value="">
+          </div>
+
           <!-- 보기 (Options) 편집기 -->
           <div class="form-group">
             <div class="form-label">
@@ -279,6 +316,11 @@
               <!-- 문제 본문 -->
               <div class="tablet-q-text" id="tablet-q-text">
                 이차방정식 $x^2 - 5x + 6 = 0$ 의 두 근 $\alpha, \beta$에 대하여 $\alpha + \beta$의 값은?
+              </div>
+
+              <!-- 도형 및 과학 실험 이미지 렌더링 영역 -->
+              <div class="tablet-diagram-wrap" id="tablet-diagram-wrap" style="display: none;">
+                <img id="tablet-diagram-img" src="" alt="도형 및 과학 실험 다이어그램">
               </div>
 
               <!-- 보기 영역 -->

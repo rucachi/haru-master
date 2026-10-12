@@ -18,18 +18,96 @@ const state = {
   lastFocusedInput: null
 };
 
+// 도형 및 과학 실험 다이어그램 SVG 프리셋
+export const PRESET_SVGS = {
+  triangle: `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 220" width="340" height="220">
+  <rect width="100%" height="100%" fill="#ffffff" rx="8"/>
+  <polygon points="60,40 60,180 270,180" fill="#f0fdf4" stroke="#0f766e" stroke-width="3" stroke-linejoin="round"/>
+  <polyline points="60,160 80,160 80,180" fill="none" stroke="#0f766e" stroke-width="2.5"/>
+  <circle cx="60" cy="40" r="4" fill="#0f766e"/>
+  <circle cx="60" cy="180" r="4" fill="#0f766e"/>
+  <circle cx="270" cy="180" r="4" fill="#0f766e"/>
+  <text x="45" y="38" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="bold" fill="#0f172a">A</text>
+  <text x="40" y="198" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="bold" fill="#0f172a">C</text>
+  <text x="282" y="190" font-family="'Inter', -apple-system, sans-serif" font-size="18" font-weight="bold" fill="#0f172a">B</text>
+  <text x="160" y="202" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-style="italic" font-weight="bold" fill="#2563eb">a = 4</text>
+  <text x="15" y="115" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-style="italic" font-weight="bold" fill="#2563eb">b = 3</text>
+  <text x="175" y="100" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-style="italic" font-weight="bold" fill="#dc2626">c = ?</text>
+  <path d="M 240,180 A 30 30 0 0 0 252,165" fill="none" stroke="#f59e0b" stroke-width="2"/>
+  <text x="220" y="168" font-family="'Inter', -apple-system, sans-serif" font-size="13" font-weight="bold" fill="#d97706">θ</text>
+</svg>
+  `.trim())}`,
+
+  science: `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 220" width="340" height="220">
+  <rect width="100%" height="100%" fill="#ffffff" rx="8"/>
+  <line x1="80" y1="205" x2="110" y2="130" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <line x1="260" y1="205" x2="230" y2="130" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <line x1="170" y1="205" x2="170" y2="130" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <line x1="90" y1="130" x2="250" y2="130" stroke="#0284c7" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 140,205 L 145,178 Q 170,173 195,178 L 200,205 Z" fill="#94a3b8" stroke="#334155" stroke-width="2"/>
+  <rect x="167" y="168" width="6" height="10" fill="#f8fafc" stroke="#475569" stroke-width="1.5"/>
+  <path d="M 170,145 Q 182,158 170,168 Q 158,158 170,145 Z" fill="#ef4444"/>
+  <path d="M 170,152 Q 177,160 170,167 Q 163,160 170,152 Z" fill="#fbbf24"/>
+  <rect x="120" y="60" width="100" height="70" rx="3" fill="#e0f2fe" fill-opacity="0.6" stroke="#0369a1" stroke-width="3"/>
+  <path d="M 121,90 Q 145,93 170,90 T 219,90 L 219,129 L 121,129 Z" fill="#38bdf8" fill-opacity="0.5"/>
+  <circle cx="145" cy="110" r="4" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
+  <circle cx="165" cy="100" r="5" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
+  <circle cx="185" cy="115" r="3" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
+  <circle cx="195" cy="103" r="4" fill="#ffffff" stroke="#0284c7" stroke-width="1.5"/>
+  <rect x="168" y="20" width="6" height="95" rx="3" fill="#ffffff" stroke="#e11d48" stroke-width="2"/>
+  <circle cx="171" cy="113" r="7" fill="#e11d48"/>
+  <line x1="171" y1="40" x2="171" y2="113" stroke="#e11d48" stroke-width="3"/>
+  <text x="180" y="32" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="bold" fill="#be123c">온도계 (100℃)</text>
+  <text x="230" y="80" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="bold" fill="#0369a1">비커 (물 100mL)</text>
+  <text x="210" y="195" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="bold" fill="#475569">알코올램프</text>
+  <rect x="12" y="10" width="112" height="22" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="20" y="25" font-family="'Inter', -apple-system, sans-serif" font-size="11" font-weight="bold" fill="#1e40af">[실험] 물의 가열 곡선</text>
+</svg>
+  `.trim())}`,
+
+  graph: `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 220" width="340" height="220">
+  <rect width="100%" height="100%" fill="#ffffff" rx="8"/>
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f1f5f9" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#grid)"/>
+  <line x1="25" y1="120" x2="315" y2="120" stroke="#334155" stroke-width="2"/>
+  <polyline points="310,116 318,120 310,124" fill="#334155"/>
+  <line x1="170" y1="210" x2="170" y2="15" stroke="#334155" stroke-width="2"/>
+  <polyline points="166,23 170,15 174,23" fill="#334155"/>
+  <text x="322" y="125" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-style="italic" font-weight="bold" fill="#1e293b">x</text>
+  <text x="165" y="13" font-family="'Inter', -apple-system, sans-serif" font-size="15" font-style="italic" font-weight="bold" fill="#1e293b">y</text>
+  <text x="155" y="135" font-family="'Inter', -apple-system, sans-serif" font-size="14" font-weight="bold" fill="#64748b">O</text>
+  <path d="M 80,30 Q 170,200 260,30" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="170" cy="158" r="4" fill="#dc2626"/>
+  <circle cx="130" cy="120" r="3.5" fill="#2563eb"/>
+  <circle cx="210" cy="120" r="3.5" fill="#2563eb"/>
+  <rect x="200" y="38" width="120" height="24" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="208" y="54" font-family="'Inter', -apple-system, sans-serif" font-size="12" font-weight="bold" fill="#1d4ed8">y = a(x - p)² + q</text>
+  <text x="178" y="172" font-family="'Inter', -apple-system, sans-serif" font-size="11" font-weight="bold" fill="#dc2626">꼭짓점 (p, q)</text>
+</svg>
+  `.trim())}`
+};
+
 // 템플릿 프리셋
 const SUBJECT_TEMPLATES = {
   "수학": {
-    question_text: "이차방정식 $2x^2 - 8x + 6 = 0$ 의 두 근의 합을 구하시오.",
+    question_text: "다음 직각삼각형 $ABC$에서 밑변 $a = 4$, 높이 $b = 3$일 때, 빗변 $c$의 길이를 구하시오. (단, $\\angle C = 90^\\circ$)",
     passage: "",
-    options: ["$2$", "$4$", "$6$", "$8$", "$10$"],
-    correct_answer: 2,
-    explanation: "근과 계수의 관계에 의해 두 근의 합은 $-(-8)/2 = 4$ 입니다."
+    image_url: PRESET_SVGS.triangle,
+    options: ["$3$", "$4$", "$5$", "$\\sqrt{7}$", "$7$"],
+    correct_answer: 3,
+    explanation: "피타고라스 정리에 의해 $c^2 = a^2 + b^2 = 4^2 + 3^2 = 16 + 9 = 25$ 이므로 $c = 5$ 입니다."
   },
   "국어": {
     question_text: "위 지문의 중심 내용으로 가장 알맞은 것은?",
     passage: "말은 마음의 거울이다. 우리가 일상에서 사용하는 단어와 어조는 상대방에 대한 배려와 존중의 깊이를 드러낸다. 바른 언어생활은 원활한 소통뿐만 아니라 스스로의 인격을 닦는 첫걸음이다.",
+    image_url: "",
     options: ["언어 사용의 역사적 변천", "바른 언어생활과 배려의 중요성", "문학 작품에 나타난 대화 양상", "비언어적 소통의 한계점", "신조어의 생성 원리"],
     correct_answer: 2,
     explanation: "글의 핵심 논지는 바른 말 사용이 상대방에 대한 배려이자 인격을 형성한다는 점입니다."
@@ -37,20 +115,29 @@ const SUBJECT_TEMPLATES = {
   "영어": {
     question_text: "What is the main topic of the passage?",
     passage: "Regular exercise not only strengthens your muscles but also boosts brain function. Studies show that students who stay active perform better in school tests.",
+    image_url: "",
     options: ["How to build muscle quickly", "The benefits of exercise on brain and study", "The best time to take school tests", "Sports equipment for teenagers", "Healthy food recipes"],
     correct_answer: 2,
     explanation: "본문은 운동이 근육뿐만 아니라 뇌 기능과 학업 성적 향상에 미치는 긍정적 효과를 설명합니다."
   },
   "과학": {
-    question_text: "식물이 빛에너지를 이용하여 이산화탄소와 물로부터 포도당과 산소를 만드는 작용은?",
+    question_text: "다음 그림과 같이 물 $100\\text{mL}$를 가열하면서 시간에 따른 온도를 측정하는 실험이다. 물이 끓기 시작할 때 온도와 상태 변화에 대한 설명으로 가장 알맞은 것은?",
     passage: "",
-    options: ["호흡 작용", "광합성 작용", "증산 작용", "발효 작용", "소화 작용"],
+    image_url: PRESET_SVGS.science,
+    options: [
+      "물이 끓는 동안 온도는 계속 상승한다.",
+      "물이 끓는 동안 온도는 $100^\\circ\\text{C}$로 일정하게 유지된다.",
+      "액체 상태의 물이 고체로 상태 변화한다.",
+      "기포의 주성분은 산소 기체이다.",
+      "가열을 멈추어도 온도는 계속 올라간다."
+    ],
     correct_answer: 2,
-    explanation: "엽록체에서 빛에너지를 흡수해 유기물을 합성하는 과정은 광합성(Photosynthesis)입니다."
+    explanation: "순수한 액체 물질이 끓는 동안에는 가해준 열에너지가 상태 변화(기화)에 쓰이므로 온도가 끓는점($100^\\circ\\text{C}$)에서 일정하게 유지됩니다."
   },
   "사회": {
     question_text: "기후 변화로 인해 북극 빙하가 감소하면서 발생하는 지구 환경 문제로 알맞은 것은?",
     passage: "",
+    image_url: "",
     options: ["해수면 상승", "오존층 회복", "사막화 중단", "지진 빈도 감소", "조석 간만의 차 소멸"],
     correct_answer: 1,
     explanation: "빙하가 녹으면 해수면이 상승하여 저지대 침수 등의 피해가 발생합니다."
@@ -58,6 +145,7 @@ const SUBJECT_TEMPLATES = {
   "역사": {
     question_text: "조선 시대 세종 대에 훈민정음 창제와 함께 편찬된 농업 기술서는?",
     passage: "",
+    image_url: "",
     options: ["농사직설", "임원경제지", "산림경제", "과농소초", "해동농서"],
     correct_answer: 1,
     explanation: "우리나라 풍토에 맞는 농법을 집대성하여 세종 때 편찬된 농서는 《농사직설》입니다."
@@ -68,6 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   initStudentSelector();
   initStudioForm();
+  initDiagramUpload();
   initTabletEmulator();
   initBatchTools();
   initSettingsModal();
@@ -129,6 +218,207 @@ function initStudentSelector() {
       showToast(`학습 대상이 '${btn.innerText.trim()}'으로 전환되었습니다.`, "info");
       renderAllViews();
     });
+  });
+}
+
+// --- 과목 테마 및 템플릿 로더 ---
+function updateSubjectTheme(subject) {
+  const badge = document.getElementById("tablet-subject-badge");
+  if (badge) {
+    badge.innerText = subject;
+  }
+}
+
+function loadSubjectTemplate(subject) {
+  const tmpl = SUBJECT_TEMPLATES[subject];
+  if (!tmpl) return;
+
+  const qText = document.getElementById("input-question-text");
+  const passage = document.getElementById("input-passage");
+  const expl = document.getElementById("input-explanation");
+  if (qText) qText.value = tmpl.question_text || "";
+  if (passage) passage.value = tmpl.passage || "";
+  if (expl) expl.value = tmpl.explanation || "";
+
+  const container = document.getElementById("options-container");
+  if (container && tmpl.options) {
+    container.innerHTML = "";
+    tmpl.options.forEach((optText, idx) => {
+      addOptionInput(optText, idx + 1 === tmpl.correct_answer);
+    });
+  }
+
+  // 템플릿에 다이어그램 이미지가 설정되어 있으면 자동 적용
+  if (tmpl.image_url) {
+    setImageDiagram(tmpl.image_url);
+  } else {
+    clearImageDiagram();
+  }
+
+  showToast(`[${subject}] 추천 문제가 폼에 로드되었습니다! ✨`, "info");
+  triggerRealtimeValidation();
+}
+
+// --- 도형 및 과학 실험 이미지 제어 ---
+export function setImageDiagram(dataUrl) {
+  const inputUrl = document.getElementById("input-image-url");
+  const previewBox = document.getElementById("diagram-preview-box");
+  const idleBox = document.getElementById("diagram-drop-idle");
+  const previewImg = document.getElementById("diagram-preview-img");
+
+  if (inputUrl) inputUrl.value = dataUrl;
+  if (previewImg) previewImg.src = dataUrl;
+  if (previewBox) previewBox.style.display = "flex";
+  if (idleBox) idleBox.style.display = "none";
+
+  triggerRealtimeValidation();
+}
+
+export function clearImageDiagram() {
+  const inputUrl = document.getElementById("input-image-url");
+  const previewBox = document.getElementById("diagram-preview-box");
+  const idleBox = document.getElementById("diagram-drop-idle");
+  const previewImg = document.getElementById("diagram-preview-img");
+  const fileInput = document.getElementById("diagram-file-input");
+
+  if (inputUrl) inputUrl.value = "";
+  if (previewImg) previewImg.src = "";
+  if (previewBox) previewBox.style.display = "none";
+  if (idleBox) idleBox.style.display = "block";
+  if (fileInput) fileInput.value = "";
+
+  triggerRealtimeValidation();
+}
+
+function optimizeImageFile(file, maxWidth = 800, maxHeight = 600, callback) {
+  if (file.type === "image/svg+xml") {
+    const reader = new FileReader();
+    reader.onload = (e) => callback(e.target.result);
+    reader.readAsDataURL(file);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      if (width > maxWidth || height > maxHeight) {
+        if (width / height > maxWidth / maxHeight) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        } else {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const optimizedDataUrl = canvas.toDataURL("image/jpeg", 0.88);
+      callback(optimizedDataUrl);
+    };
+    img.onerror = () => callback(e.target.result);
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function initDiagramUpload() {
+  const dropzone = document.getElementById("diagram-dropzone");
+  const fileInput = document.getElementById("diagram-file-input");
+  const btnRemove = document.getElementById("btn-remove-diagram");
+
+  // 프리셋 버튼 바인딩
+  document.getElementById("btn-preset-triangle")?.addEventListener("click", () => {
+    setImageDiagram(PRESET_SVGS.triangle);
+    showToast("직각삼각형(피타고라스/삼각비) 다이어그램이 설정되었습니다. 📐", "success");
+  });
+
+  document.getElementById("btn-preset-science")?.addEventListener("click", () => {
+    setImageDiagram(PRESET_SVGS.science);
+    showToast("과학 실험 장치도(비커 가열 곡선)가 설정되었습니다. 🔬", "success");
+  });
+
+  document.getElementById("btn-preset-graph")?.addEventListener("click", () => {
+    setImageDiagram(PRESET_SVGS.graph);
+    showToast("좌표평면 함수 그래프가 설정되었습니다. 📈", "success");
+  });
+
+  // 드롭존 클릭 (삭제 버튼 클릭 제외)
+  dropzone?.addEventListener("click", (e) => {
+    if (e.target.closest("#btn-remove-diagram")) return;
+    fileInput?.click();
+  });
+
+  // 파일 선택
+  fileInput?.addEventListener("change", (e) => {
+    if (e.target.files && e.target.files[0]) {
+      processDiagramFile(e.target.files[0]);
+    }
+  });
+
+  // 드래그 앤 드롭
+  if (dropzone) {
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("dragover");
+    });
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        processDiagramFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  // 삭제 버튼
+  btnRemove?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    clearImageDiagram();
+    showToast("첨부된 다이어그램이 제거되었습니다.", "info");
+  });
+
+  // 전역 클립보드 붙여넣기 (Ctrl + V)
+  window.addEventListener("paste", (e) => {
+    const items = (e.clipboardData || window.clipboardData)?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf("image") !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          processDiagramFile(file);
+          showToast("클립보드 화면 캡처 이미지가 성공적으로 첨부되었습니다! 🖼️", "success");
+          e.preventDefault();
+          break;
+        }
+      }
+    }
+  });
+}
+
+function processDiagramFile(file) {
+  if (!file.type.startsWith("image/")) {
+    showToast("이미지 파일(.png, .jpg, .svg, .webp)만 업로드 가능합니다.", "error");
+    return;
+  }
+
+  optimizeImageFile(file, 800, 600, (dataUrl) => {
+    setImageDiagram(dataUrl);
+    showToast(`'${file.name || '캡처 이미지'}' 다이어그램이 첨부되었습니다!`, "success");
   });
 }
 
@@ -414,6 +704,7 @@ function getFormData() {
   const grade = Number(document.getElementById("input-grade")?.value || 3);
   const question_text = document.getElementById("input-question-text")?.value || "";
   const passage = document.getElementById("input-passage")?.value || "";
+  const image_url = document.getElementById("input-image-url")?.value || "";
   const explanation = document.getElementById("input-explanation")?.value || "";
   const assignDate = document.getElementById("input-assign-date")?.value || "";
 
@@ -436,6 +727,7 @@ function getFormData() {
     grade,
     question_text,
     passage,
+    image_url,
     options,
     correct_answer,
     explanation,
@@ -519,6 +811,19 @@ function renderLiveTabletPreview(data) {
 
   // 본문 렌더링
   qTextEl.innerHTML = renderMathText(data.question_text || "(문제를 입력하세요)");
+
+  // 도형 및 과학 실험 이미지 렌더링
+  const diagWrap = document.getElementById("tablet-diagram-wrap");
+  const diagImg = document.getElementById("tablet-diagram-img");
+  if (diagWrap && diagImg) {
+    if (data.image_url && data.image_url.trim()) {
+      diagImg.src = data.image_url;
+      diagWrap.style.display = "block";
+    } else {
+      diagWrap.style.display = "none";
+      diagImg.src = "";
+    }
+  }
 
   // 보기 렌더링
   optionsGroup.innerHTML = "";
@@ -622,6 +927,7 @@ async function handleSaveQuestion() {
     grade: data.grade,
     question_text: data.question_text,
     passage: data.passage,
+    image_url: data.image_url,
     options: data.options,
     correct_answer: data.correct_answer,
     explanation: data.explanation
@@ -714,7 +1020,7 @@ async function renderOverviewTab() {
       <div class="assign-questions-preview">
         ${(fullAssign?.questions || []).map(q => `
           <div class="assign-q-item">
-            <span>[${q.subject}] ${q.question_text.slice(0, 24)}...</span>
+            <span>[${q.subject}] ${q.image_url ? '🖼️ ' : ''}${q.question_text.slice(0, 24)}...</span>
             <span style="color: var(--accent-cyan);">정답: ${q.correct_answer}번</span>
           </div>
         `).join("")}
@@ -777,6 +1083,11 @@ async function renderReviewsTab() {
       <div style="font-size: 0.95rem; font-weight: 600; margin: 0.6rem 0; color: #f1f5f9;">
         ${renderMathText(q.question_text || '')}
       </div>
+      ${q.image_url ? `
+        <div style="text-align: center; margin: 8px 0; background: #ffffff; padding: 6px; border-radius: 6px;">
+          <img src="${q.image_url}" alt="문제 다이어그램" style="max-height: 140px; max-width: 100%; object-fit: contain; display: block; margin: 0 auto;">
+        </div>
+      ` : ''}
       <div style="font-size: 0.85rem; color: var(--text-muted); background: var(--bg-input); padding: 8px 12px; border-radius: 6px;">
         💡 <strong>정답: ${q.correct_answer}번</strong> | ${renderMathText(q.explanation || '해설 없음')}
       </div>
