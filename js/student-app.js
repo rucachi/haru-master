@@ -593,14 +593,20 @@ class StudentApp {
       }
     }
 
-    // 지문
+    // 지문 (국어, 영어, 탐구 자료 등 - 내부 스크롤 없이 시원하게 표시)
     const passageBox = document.getElementById("q-passage-box");
     if (passageBox) {
       if (q.passage && q.passage.trim()) {
         passageBox.style.display = "block";
-        passageBox.innerText = q.passage;
+        passageBox.innerHTML = `
+          <div class="q-passage-header">
+            <span>📖</span> [ 다음 글을 읽고 물음에 답하시오 ]
+          </div>
+          <div class="q-passage-content">${this.renderMath(q.passage)}</div>
+        `;
       } else {
         passageBox.style.display = "none";
+        passageBox.innerHTML = "";
       }
     }
 
@@ -657,6 +663,11 @@ class StudentApp {
     const nextBtn = document.getElementById("btn-next-question");
     if (nextBtn) nextBtn.style.display = "none";
 
+    // 좌측 문제 패널 및 전체 창 스크롤 맨 위로 초기화 (이전 문제 스크롤 잔여로 인한 잘림 방지)
+    const qPane = document.getElementById("question-pane");
+    if (qPane) {
+      qPane.scrollTop = 0;
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 

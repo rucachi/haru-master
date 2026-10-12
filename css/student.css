@@ -216,7 +216,7 @@ body {
   flex-direction: column;
   gap: 1.25rem;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .q-meta-row {
@@ -245,26 +245,50 @@ body {
   border-radius: 999px;
 }
 
-/* 지문 박스 */
+/* 지문 박스 (국어/영어/탐구 자료 지문) - 스크롤 잘림 원천 차단 */
 .q-passage-box {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.75);
   border: 1px solid var(--border-glass);
+  border-left: 4px solid var(--student-primary);
   border-radius: 16px;
-  padding: 1.25rem;
-  font-size: 0.98rem;
-  line-height: 1.7;
-  color: #cbd5e1;
-  max-height: 220px;
-  overflow-y: auto;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #f1f5f9;
+  max-height: none !important; /* 내부 스크롤 박스 제거: 전체 지문 시원하게 노출 */
+  overflow: visible !important;
+  word-break: keep-all;
+  white-space: pre-wrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  margin-bottom: 0.5rem;
+}
+
+.q-passage-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--student-accent);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.q-passage-content {
+  user-select: text;
+  line-height: 1.85;
+  color: #e2e8f0;
 }
 
 /* 문제 본문 */
 .q-text-body {
   font-size: 1.25rem;
   font-weight: 700;
-  line-height: 1.6;
+  line-height: 1.7;
   color: #ffffff;
   user-select: text;
+  word-break: keep-all;
 }
 
 /* 도형/실험도 다이어그램 */
@@ -477,7 +501,9 @@ body.theme-chahye .opt-card-btn.selected {
   height: 100%;
   max-height: calc(100vh - 150px);
   overflow-y: auto;
-  padding-right: 4px;
+  padding: 0 8px 3.5rem 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 .study-pane-left::-webkit-scrollbar {
