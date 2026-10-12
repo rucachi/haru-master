@@ -3,7 +3,7 @@
  * 첫째 나경이(중3) / 둘째 차혜(중1) 과목 선택, 1일 20문제 학습 및 "더 공부하기(오답 포함)" 엔진
  */
 
-import { dbService } from './firebase-service.js?v=b78512f';
+import { dbService } from './firebase-service.js?v=c2f6a1b';
 
 // 기본 1일 학습 문항 수
 const DAILY_TARGET = 20;

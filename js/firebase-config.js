@@ -4,7 +4,7 @@
  */
 
 export const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCqc5NUhytZnU410t6fKK_To8yGh1EP9Vo",
+  apiKey: "AIzaSyCqc5NUhytZnU41Ot6fKK_To8yGh1EP9Vo",
   authDomain: "haru-master.firebaseapp.com",
   projectId: "haru-master",
   storageBucket: "haru-master.firebasestorage.app",
