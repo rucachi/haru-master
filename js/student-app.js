@@ -719,6 +719,17 @@ class StudentApp {
     const subPill = document.getElementById("q-subject-pill");
     if (subPill) subPill.innerText = q.subject || "공통";
 
+    // 문제 새로고침 버튼 텍스트 업데이트
+    const refreshText = document.getElementById("refresh-btn-text");
+    if (refreshText) {
+      if (this.selectedSubject === "ALL") {
+        const totalTarget = (this.config.grade === 3) ? 25 : 22;
+        refreshText.innerText = `전체 새 문제 (${totalTarget})`;
+      } else {
+        refreshText.innerText = `${this.selectedSubject} 새 문제 (10)`;
+      }
+    }
+
     // 오답 다시 풀기 뱃지
     const srsBadge = document.getElementById("q-srs-badge");
     if (srsBadge) {
@@ -1253,6 +1264,32 @@ class StudentApp {
   initEventListeners() {
     document.getElementById("btn-submit-answer")?.addEventListener("click", () => this.submitAnswer());
     document.getElementById("btn-next-question")?.addEventListener("click", () => this.nextQuestion());
+
+    // 문제 새로고침 버튼 (과목별 무한 추가 학습)
+    const btnRefreshQ = document.getElementById("btn-refresh-questions");
+    if (btnRefreshQ) {
+      btnRefreshQ.addEventListener("click", () => {
+        const subName = (this.selectedSubject === "ALL") ? "전체 과목" : this.selectedSubject;
+        const icon = btnRefreshQ.querySelector(".refresh-icon");
+        if (icon) {
+          icon.style.transform = "rotate(360deg)";
+        }
+
+        // 오늘 진행 상태 초기화
+        const todayStr = new Date().toISOString().slice(0, 10);
+        localStorage.removeItem(`harumaster_prog_${this.config.id}_${todayStr}_${this.selectedSubject}`);
+
+        // isMoreStudy = true 로 신규 랜덤 문제 세트 로드
+        this.loadQuestions(true);
+
+        const countText = (this.selectedSubject === "ALL") ? (this.config.grade === 3 ? 25 : 22) : 10;
+        this.showToast(`🔥 [${subName}] 새로운 ${countText}문제가 장전되었습니다! 화이팅 ✨`, "success");
+
+        setTimeout(() => {
+          if (icon) icon.style.transform = "";
+        }, 500);
+      });
+    }
   }
 }
 

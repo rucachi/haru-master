@@ -83,8 +83,14 @@
       <section class="study-pane-left" id="question-pane">
         <div class="q-card" id="q-card">
           <div class="q-meta-row">
-            <span class="q-subject-pill" id="q-subject-pill">수학</span>
-            <span class="q-srs-badge" id="q-srs-badge" style="display: none;">🔥 에빙하우스 오답 복습</span>
+            <div class="q-meta-left">
+              <span class="q-subject-pill" id="q-subject-pill">수학</span>
+              <span class="q-srs-badge" id="q-srs-badge" style="display: none;">🔥 에빙하우스 오답 복습</span>
+            </div>
+            <button type="button" class="btn-refresh-questions" id="btn-refresh-questions" title="현재 과목의 새로운 문제 세트를 불러옵니다">
+              <span class="refresh-icon">🔄</span>
+              <span id="refresh-btn-text">새 문제 받기</span>
+            </button>
           </div>
 
           <!-- 지문 영역 (국어/영어) -->

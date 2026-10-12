@@ -223,6 +223,15 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.q-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .q-subject-pill {
@@ -243,6 +252,45 @@ body {
   border: 1px solid rgba(245, 158, 11, 0.3);
   padding: 3px 10px;
   border-radius: 999px;
+}
+
+/* 문제 새로고침 버튼 (과목별 무한 추가 학습) */
+.btn-refresh-questions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  color: #e2e8f0;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  user-select: none;
+}
+
+.btn-refresh-questions:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--student-primary);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-refresh-questions:active {
+  transform: scale(0.96);
+}
+
+.btn-refresh-questions .refresh-icon {
+  display: inline-block;
+  transition: transform 0.4s ease;
+  font-size: 0.95rem;
+}
+
+.btn-refresh-questions:hover .refresh-icon {
+  transform: rotate(180deg);
 }
 
 /* 지문 박스 (국어/영어/탐구 자료 지문) - 스크롤 잘림 원천 차단 */
