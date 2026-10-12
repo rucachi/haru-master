@@ -472,45 +472,100 @@ class StudentApp {
       });
     }
 
-    // 4. 20문제 완성하기 (오답 우선 채우기 + 일반 문제 섞기)
-    let final20 = [];
+    // 4. 과목별 맞춤 배정 및 최신 문제 우선 일일 랜덤 추출 엔진
+    // 사용자 지정: 수학 8, 국어 독해 4, 영어 독해 4, 나머지 과목 3문항씩 (나경이 25문항 / 차혜 22문항)
+    const SUBJECT_QUOTAS = {
+      3: { "수학": 8, "국어": 4, "영어": 4, "과학": 3, "사회": 3, "역사": 3 },
+      1: { "수학": 8, "국어": 4, "영어": 4, "과학": 3, "사회": 3 }
+    };
 
-    // 오답 문항 추가 (최대 10개까지 우선 배정)
-    this.shuffleArray(wrongPool);
-    wrongPool.slice(0, 10).forEach(q => {
-      final20.push(q);
-      seenQids.add(q.question_id);
-    });
+    const quotaMap = SUBJECT_QUOTAS[grade] || { "수학": 8, "국어": 4, "영어": 4, "과학": 3, "사회": 3 };
+    const targetSubjects = (subFilter === "ALL") ? Object.keys(quotaMap) : [subFilter];
 
-    // 일반 DB 문항 추가
-    this.shuffleArray(candidateDbPool);
-    candidateDbPool.forEach(q => {
-      if (final20.length < DAILY_TARGET && !seenQids.has(q.question_id)) {
-        final20.push(q);
-        seenQids.add(q.question_id);
+    // 날짜 기반 시드 생성 (오늘 하루 동안은 새로고침해도 동일 세트 유지, 내일이 되면 자동으로 새로운 문제로 갱신)
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const baseSeed = isMoreStudy ? Date.now() : this.hashSeed(`${todayStr}_${this.config.id}`);
+
+    let finalQuestions = [];
+
+    targetSubjects.forEach((sub, sIdx) => {
+      const quota = (subFilter === "ALL") ? (quotaMap[sub] || 3) : (quotaMap[sub] ? Math.max(quotaMap[sub], 10) : 10);
+
+      // (1) 해당 과목의 오답 문항 수집 (최대 1~2개 우선 배정)
+      const subWrongs = wrongPool.filter(q => q.subject === sub);
+      const subChosen = [];
+
+      if (subWrongs.length > 0) {
+        this.shuffleArrayWithSeed(subWrongs, baseSeed + sIdx * 7);
+        const wrongTake = Math.min(subWrongs.length, Math.max(1, Math.floor(quota * 0.3)));
+        for (let i = 0; i < wrongTake; i++) {
+          subChosen.push(subWrongs[i]);
+          seenQids.add(subWrongs[i].question_id);
+        }
       }
-    });
 
-    // 커리큘럼 뱅크 문항으로 20문제까지 채우기
-    this.shuffleArray(bankPool);
-    bankPool.forEach(q => {
-      if (final20.length < DAILY_TARGET && !seenQids.has(q.question_id)) {
-        final20.push(q);
-        seenQids.add(q.question_id);
+      // (2) 해당 과목의 DB 및 커리큘럼 문항 수집
+      let subCandidates = [
+        ...candidateDbPool.filter(q => q.subject === sub && !seenQids.has(q.question_id)),
+        ...bankPool.filter(q => q.subject === sub && !seenQids.has(q.question_id))
+      ];
+
+      // 국어/영어의 경우 독해(Passage가 있는) 문제를 우선 정렬
+      if (sub === "국어" || sub === "영어") {
+        subCandidates.sort((a, b) => {
+          const aHasPassage = (a.passage && a.passage.trim().length > 0) ? 1 : 0;
+          const bHasPassage = (b.passage && b.passage.trim().length > 0) ? 1 : 0;
+          return bHasPassage - aHasPassage;
+        });
       }
+
+      // 최신 업데이트 문제 중심 배치:
+      // 문제 풀의 후반부(최신 단원/최신 생성 문항)에 65% 가중치 부여
+      const remainingQuota = quota - subChosen.length;
+      if (remainingQuota > 0 && subCandidates.length > 0) {
+        // 후보군을 최신순(인덱스 역순 또는 ID 역순)으로 정렬
+        const sortedCandidates = [...subCandidates].reverse();
+        
+        // 최신 풀(상위 60%)과 기본 풀(하위 40%) 분할
+        const splitIdx = Math.max(1, Math.floor(sortedCandidates.length * 0.6));
+        const recentPool = sortedCandidates.slice(0, splitIdx);
+        const olderPool = sortedCandidates.slice(splitIdx);
+
+        // 최신 풀에서 65% 추출
+        const recentTakeCount = Math.min(recentPool.length, Math.ceil(remainingQuota * 0.65));
+        this.shuffleArrayWithSeed(recentPool, baseSeed + sIdx * 31);
+        for (let i = 0; i < recentTakeCount; i++) {
+          if (recentPool[i]) {
+            subChosen.push(recentPool[i]);
+            seenQids.add(recentPool[i].question_id);
+          }
+        }
+
+        // 나머지 분량을 이전 풀 + 남은 최신 풀에서 보충
+        const remainingToPick = quota - subChosen.length;
+        const fallbackPool = [...olderPool, ...recentPool.slice(recentTakeCount)].filter(q => !seenQids.has(q.question_id));
+        this.shuffleArrayWithSeed(fallbackPool, baseSeed + sIdx * 53);
+
+        for (let i = 0; i < remainingToPick && i < fallbackPool.length; i++) {
+          subChosen.push(fallbackPool[i]);
+          seenQids.add(fallbackPool[i].question_id);
+        }
+      }
+
+      // 부족한 경우 동적 생성기로 채우기
+      let dynCounter = 1;
+      while (subChosen.length < quota) {
+        const dynQ = this.generateDynamicQuestion(grade, sub, dynCounter++);
+        subChosen.push(dynQ);
+      }
+
+      finalQuestions.push(...subChosen);
     });
 
-    // 만약 여전히 20문제 미만이면 문제 변형 생성기로 무조건 20문제 맞추기
-    let fillCounter = 1;
-    while (final20.length < DAILY_TARGET) {
-      const generated = this.generateDynamicQuestion(grade, subFilter, fillCounter++);
-      final20.push(generated);
-    }
+    // 각 과목 문제가 자연스럽게 번갈아가며 나오도록 날짜 시드로 전체 셔플
+    this.shuffleArrayWithSeed(finalQuestions, baseSeed + 999);
 
-    // 최종 20문항을 섞어서 오답이 중간중간 자연스럽게 나오도록 배치
-    this.shuffleArray(final20);
-
-    this.questions = final20.slice(0, DAILY_TARGET);
+    this.questions = finalQuestions;
     this.currentIndex = 0;
     this.solvedCount = 0;
     this.correctCount = 0;
@@ -520,8 +575,39 @@ class StudentApp {
     this.updateProgress();
 
     if (isMoreStudy) {
-      this.showToast(`🔥 20문제가 새롭게 생성되었습니다! (틀린 문제 복습 포함 ✨)`, "success");
+      this.showToast(`🔥 ${this.questions.length}문제가 새롭게 생성되었습니다! (틀린 문제 복습 포함 ✨)`, "success");
     }
+  }
+
+  /**
+   * 날짜 및 고유 문자열 기반 시드 해시 함수
+   */
+  hashSeed(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+
+  /**
+   * 시드 기반 난수 셔플 (Fisher-Yates with PRNG)
+   */
+  shuffleArrayWithSeed(array, seed) {
+    let s = seed % 2147483647;
+    if (s <= 0) s += 2147483646;
+
+    const pseudoRandom = () => {
+      s = (s * 16807) % 2147483647;
+      return (s - 1) / 2147483646;
+    };
+
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(pseudoRandom() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
 
   /**
@@ -768,7 +854,7 @@ class StudentApp {
     const nextBtn = document.getElementById("btn-next-question");
     if (nextBtn) {
       nextBtn.style.display = "block";
-      nextBtn.innerText = (this.currentIndex + 1 === this.questions.length) ? "🏆 20문제 결과 보기" : "다음 문제 풀기 ➔";
+      nextBtn.innerText = (this.currentIndex + 1 === this.questions.length) ? `🏆 ${this.questions.length}문제 결과 보기` : "다음 문제 풀기 ➔";
     }
 
     this.updateProgress();
@@ -803,15 +889,16 @@ class StudentApp {
 
     const rate = this.solvedCount > 0 ? Math.round((this.correctCount / this.solvedCount) * 100) : 100;
     const wrongCnt = this.solvedCount - this.correctCount;
+    const totalQ = this.questions.length;
 
     const compHtml = `
       <div class="completion-celebration-card">
         <div class="celebration-trophy">🏆</div>
         <h2 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 8px;">
-          오늘의 20문제 목표 달성!
+          오늘의 ${totalQ}문제 목표 달성!
         </h2>
         <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1.75rem;">
-          ${this.config.name}아, 집중해서 20문제를 끝까지 완주했어! 정말 대단해 ✨
+          ${this.config.name}아, 집중해서 ${totalQ}문제를 끝까지 완주했어! 정말 대단해 ✨
         </p>
 
         <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
@@ -832,13 +919,13 @@ class StudentApp {
         </div>
 
         <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 14px 20px; max-width: 520px; margin: 0 auto 2.5rem auto; font-size: 0.95rem; color: #a7f3d0;">
-          📡 아빠의 관제 대시보드(Firebase)에 20문제 학습 결과가 실시간으로 전송되었습니다!
+          📡 아빠의 관제 대시보드(Firebase)에 ${totalQ}문제 학습 결과가 실시간으로 전송되었습니다!
         </div>
 
         <!-- 핵심: 더 공부하기 액션 버튼 -->
         <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
           <button type="button" class="btn-more-study" id="btn-study-more">
-            <span>🔥</span> 20문제 더 공부하기 (틀린 문제 포함)
+            <span>🔥</span> ${totalQ}문제 더 공부하기 (새로운 문제 + 오답 복습)
           </button>
           <button type="button" class="btn-student-next" style="background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-glass);" onclick="window.location.reload()">
             🔄 처음부터 다시 풀기

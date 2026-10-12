@@ -139,23 +139,22 @@ def get_study_status_today():
     # 현재 시점 실시간 데이터
     return {
         "date": datetime.now().strftime("%Y-%m-%d"),
-        "target_per_student": 20,
         "nakyung": {
             "name": "나경이 (중3)",
-            "solved": 20,
-            "target": 20,
-            "correct": 18,
+            "solved": 25,
+            "target": 25,
+            "correct": 23,
             "wrong": 2,
-            "accuracy": 90,
+            "accuracy": 92,
             "completed": True
         },
         "chahye": {
             "name": "차혜 (중1)",
-            "solved": 14, # 예시: 14/20 문항 진행 중
-            "target": 20,
-            "correct": 12,
+            "solved": 16, # 예시: 16/22 문항 진행 중
+            "target": 22,
+            "correct": 14,
             "wrong": 2,
-            "accuracy": 86,
+            "accuracy": 88,
             "completed": False
         }
     }
@@ -173,8 +172,8 @@ def check_daily_and_notify_kakao(force_alert: bool = False):
 
     if has_uncompleted or force_alert:
         msg = (
-            f"[하루마스터 알림] ⏰ 저녁 9시 학습 현황 안내\n\n"
-            f"오늘 목표(20문항) 미완료 학습이 있습니다!\n"
+            f"[하루마스터 알림] ⏰ 저녁 9시 맞춤 학습 현황 안내\n\n"
+            f"오늘 목표 미완료 학습이 있습니다!\n"
             f"👧 나경이: {nakyung['solved']}/{nakyung['target']}문항 "
             f"({'완료' if nakyung['completed'] else '진행 중'})\n"
             f"👦 차혜: {chahye['solved']}/{chahye['target']}문항 "

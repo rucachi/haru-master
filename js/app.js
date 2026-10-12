@@ -127,26 +127,26 @@ class DadMonitoringApp {
       : ["수학", "과학", "사회", "영어", "국어"];
 
     if (isNakyung) {
-      // 나경이 (중3) 통계 모델
+      // 나경이 (중3) 통계 모델 (수학 8, 국어 4, 영어 4, 과학 3, 사회 3, 역사 3 = 총 25문항)
       if (this.horizon === "daily") {
         return {
           studentName: "나경이",
           grade: 3,
-          solvedCount: 20,
-          targetCount: 20,
-          correctCount: 18,
+          solvedCount: 25,
+          targetCount: 25,
+          correctCount: 23,
           wrongCount: 2,
           streakDays: 6,
           masteredCount: 42,
           subjects: [
-            { name: "수학", correct: 5, wrong: 0, rate: 100 },
-            { name: "과학", correct: 3, wrong: 1, rate: 75 },
-            { name: "사회", correct: 4, wrong: 0, rate: 100 },
-            { name: "역사", correct: 2, wrong: 1, rate: 67 },
-            { name: "영어", correct: 2, wrong: 0, rate: 100 },
-            { name: "국어", correct: 2, wrong: 0, rate: 100 }
+            { name: "수학", correct: 7, wrong: 1, rate: 88 },
+            { name: "국어", correct: 4, wrong: 0, rate: 100 },
+            { name: "영어", correct: 4, wrong: 0, rate: 100 },
+            { name: "과학", correct: 2, wrong: 1, rate: 67 },
+            { name: "사회", correct: 3, wrong: 0, rate: 100 },
+            { name: "역사", correct: 3, wrong: 0, rate: 100 }
           ],
-          weeklyTrend: [18, 20, 20, 20, 20, 20, 20],
+          weeklyTrend: [22, 25, 25, 25, 25, 25, 25],
           days: ["월", "화", "수", "목", "금", "토", "오늘(일)"],
           monthlyProgress: 180, // 480문항 중 180문항
           totalBank: 480
@@ -155,21 +155,21 @@ class DadMonitoringApp {
         return {
           studentName: "나경이",
           grade: 3,
-          solvedCount: 138,
-          targetCount: 140,
-          correctCount: 122,
-          wrongCount: 16,
+          solvedCount: 172,
+          targetCount: 175,
+          correctCount: 154,
+          wrongCount: 18,
           streakDays: 6,
           masteredCount: 42,
           subjects: [
-            { name: "수학", correct: 28, wrong: 2, rate: 93 },
-            { name: "과학", correct: 22, wrong: 8, rate: 73 },
-            { name: "사회", correct: 27, wrong: 3, rate: 90 },
-            { name: "역사", correct: 25, wrong: 5, rate: 83 },
-            { name: "영어", correct: 10, wrong: 0, rate: 100 },
-            { name: "국어", correct: 10, wrong: 0, rate: 100 }
+            { name: "수학", correct: 50, wrong: 6, rate: 89 },
+            { name: "국어", correct: 28, wrong: 0, rate: 100 },
+            { name: "영어", correct: 28, wrong: 0, rate: 100 },
+            { name: "과학", correct: 16, wrong: 5, rate: 76 },
+            { name: "사회", correct: 18, wrong: 3, rate: 86 },
+            { name: "역사", correct: 14, wrong: 4, rate: 78 }
           ],
-          weeklyTrend: [20, 18, 20, 20, 20, 20, 20],
+          weeklyTrend: [25, 22, 25, 25, 25, 25, 25],
           days: ["월", "화", "수", "목", "금", "토", "오늘(일)"],
           monthlyProgress: 180,
           totalBank: 480
@@ -200,25 +200,25 @@ class DadMonitoringApp {
         };
       }
     } else {
-      // 차혜 (중1) 통계 모델
+      // 차혜 (중1) 통계 모델 (수학 8, 국어 4, 영어 4, 과학 3, 사회 3 = 총 22문항)
       if (this.horizon === "daily") {
         return {
           studentName: "차혜",
           grade: 1,
-          solvedCount: 20,
-          targetCount: 20,
-          correctCount: 17,
+          solvedCount: 22,
+          targetCount: 22,
+          correctCount: 19,
           wrongCount: 3,
           streakDays: 5,
           masteredCount: 31,
           subjects: [
-            { name: "수학", correct: 4, wrong: 2, rate: 67 },
-            { name: "과학", correct: 5, wrong: 1, rate: 83 },
-            { name: "사회", correct: 4, wrong: 0, rate: 100 },
-            { name: "영어", correct: 2, wrong: 0, rate: 100 },
-            { name: "국어", correct: 2, wrong: 0, rate: 100 }
+            { name: "수학", correct: 6, wrong: 2, rate: 75 },
+            { name: "국어", correct: 4, wrong: 0, rate: 100 },
+            { name: "영어", correct: 4, wrong: 0, rate: 100 },
+            { name: "과학", correct: 2, wrong: 1, rate: 67 },
+            { name: "사회", correct: 3, wrong: 0, rate: 100 }
           ],
-          weeklyTrend: [20, 20, 18, 20, 20, 20, 20],
+          weeklyTrend: [22, 22, 20, 22, 22, 22, 22],
           days: ["월", "화", "수", "목", "금", "토", "오늘(일)"],
           monthlyProgress: 140,
           totalBank: 380
