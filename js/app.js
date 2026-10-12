@@ -14,7 +14,8 @@ const state = {
   currentSubject: "수학",
   currentGrade: 3,
   tabletSelectedAnswer: null,
-  tabletIsGraded: false
+  tabletIsGraded: false,
+  lastFocusedInput: null
 };
 
 // 템플릿 프리셋
@@ -154,20 +155,78 @@ function initStudioForm() {
     loadSubjectTemplate(state.currentSubject);
   });
 
-  // LaTeX 수식 툴바 버튼
+  // LaTeX 수식 툴바 버튼 이벤트 바인딩
   document.querySelectorAll(".latex-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const latex = btn.dataset.latex;
-      insertTextAtCursor(document.getElementById("input-question-text"), latex);
-      triggerRealtimeValidation();
+      const raw = btn.dataset.raw;
+      if (latex) {
+        insertMathFormula(latex, false);
+      } else if (raw) {
+        insertMathFormula(raw, true);
+      }
     });
   });
+
+  // 수식 마법사 모달 바인딩
+  document.getElementById("btn-open-math-wizard")?.addEventListener("click", () => {
+    document.getElementById("modal-math-wizard")?.classList.add("open");
+  });
+
+  // 1) 분수 마법사
+  document.getElementById("wiz-btn-insert-frac")?.addEventListener("click", () => {
+    const num = document.getElementById("wiz-frac-num")?.value.trim() || "a";
+    const den = document.getElementById("wiz-frac-den")?.value.trim() || "b";
+    insertMathFormula(`\\frac{${num}}{${den}}`, false);
+    document.getElementById("modal-math-wizard")?.classList.remove("open");
+    showToast(`분수 \\frac{${num}}{${den}} 가 삽입되었습니다.`, "success");
+  });
+
+  // 2) 제곱근 마법사
+  document.getElementById("wiz-btn-insert-sqrt")?.addEventListener("click", () => {
+    const coef = document.getElementById("wiz-sqrt-coef")?.value.trim() || "";
+    const val = document.getElementById("wiz-sqrt-val")?.value.trim() || "x";
+    const expr = coef ? `${coef}\\sqrt{${val}}` : `\\sqrt{${val}}`;
+    insertMathFormula(expr, false);
+    document.getElementById("modal-math-wizard")?.classList.remove("open");
+    showToast(`루트 수식이 삽입되었습니다.`, "success");
+  });
+
+  // 3) 거듭제곱 마법사
+  document.getElementById("wiz-btn-insert-pow")?.addEventListener("click", () => {
+    const base = document.getElementById("wiz-pow-base")?.value.trim() || "x";
+    const exp = document.getElementById("wiz-pow-exp")?.value.trim() || "2";
+    const expr = exp.length > 1 ? `${base}^{${exp}}` : `${base}^${exp}`;
+    insertMathFormula(expr, false);
+    document.getElementById("modal-math-wizard")?.classList.remove("open");
+    showToast(`거듭제곱 수식이 삽입되었습니다.`, "success");
+  });
+
+  // 4) 쉬운 수식 자동 변환기 바인딩
+  document.getElementById("btn-auto-math")?.addEventListener("click", autoConvertNaturalMath);
 
   // 보기 추가 버튼
   document.getElementById("btn-add-option")?.addEventListener("click", () => {
     addOptionInput();
     triggerRealtimeValidation();
   });
+
+  // 포커스 추적: 아빠가 마지막으로 클릭한 입력창을 기억하여 수식을 정확한 위치에 넣음
+  const focusInputs = [
+    "input-question-text",
+    "input-passage",
+    "input-explanation"
+  ];
+  focusInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("focus", () => { state.lastFocusedInput = el; });
+      el.addEventListener("click", () => { state.lastFocusedInput = el; });
+    }
+  });
+
+  // 기본 활성 입력창 지정
+  state.lastFocusedInput = document.getElementById("input-question-text");
 
   // 폼 입력 필드 실시간 변경 감지 (디바운스 처리)
   const formInputs = [
@@ -201,54 +260,96 @@ function initStudioForm() {
 
   // 초기 렌더링
   bindOptionsEvents();
+  renderToolbarMathButtons();
   triggerRealtimeValidation();
 }
 
-function updateSubjectTheme(subject) {
-  const badge = document.getElementById("tablet-subject-badge");
-  if (badge) {
-    badge.innerText = subject;
-    const colors = {
-      "수학": "var(--sub-math)",
-      "국어": "var(--sub-kor)",
-      "영어": "var(--sub-eng)",
-      "과학": "var(--sub-sci)",
-      "사회": "var(--sub-soc)",
-      "역사": "var(--sub-hist)"
-    };
-    badge.style.background = colors[subject] || "var(--primary)";
+/**
+ * 수식 도구 버튼들에 실제 KaTeX 수학 그래픽 수식 렌더링
+ */
+function renderToolbarMathButtons() {
+  if (typeof window.katex === "undefined") {
+    setTimeout(renderToolbarMathButtons, 300);
+    return;
   }
+  document.querySelectorAll(".math-render-btn").forEach(btn => {
+    const latex = btn.dataset.latex;
+    if (latex) {
+      try {
+        btn.innerHTML = window.katex.renderToString(latex, { throwOnError: false });
+      } catch (e) {}
+    }
+  });
 }
 
-function loadSubjectTemplate(subject) {
-  const tpl = SUBJECT_TEMPLATES[subject];
-  if (!tpl) return;
-
-  document.getElementById("input-question-text").value = tpl.question_text;
-  document.getElementById("input-passage").value = tpl.passage;
-  document.getElementById("input-explanation").value = tpl.explanation;
-
-  // 보기 세팅
-  const list = document.getElementById("options-container");
-  if (list) {
-    list.innerHTML = "";
-    tpl.options.forEach((optText, idx) => {
-      addOptionInput(optText, idx + 1 === tpl.correct_answer);
-    });
-  }
-
-  showToast(`[${subject}] 표준 템플릿이 로드되었습니다.`, "success");
-  triggerRealtimeValidation();
-}
-
-function insertTextAtCursor(input, text) {
+/**
+ * 스마트 수식 삽입기:
+ * - 마지막으로 포커스된 입력창(문제 본문, 보기 1~5번, 해설 등)에 정확히 삽입
+ * - 이미 $...$ 안에 커서가 있으면 중복 $ 를 붙이지 않고 수식만 삽입
+ * - 수식 밖이면 $...$ 로 자동 래핑하여 문법 파괴 방지
+ */
+function insertMathFormula(formulaText, isRawSymbol = false) {
+  const input = state.lastFocusedInput || document.getElementById("input-question-text");
   if (!input) return;
+
   const start = input.selectionStart || 0;
   const end = input.selectionEnd || 0;
-  const val = input.value;
-  input.value = val.substring(0, start) + text + val.substring(end);
-  input.selectionStart = input.selectionEnd = start + text.length;
+  const val = input.value || "";
+
+  // 현재 커서 앞의 $ 개수 확인 (홀수 개이면 이미 $...$ 수식 내부임)
+  const textBefore = val.substring(0, start);
+  const dollarCountBefore = (textBefore.match(/\$/g) || []).length;
+  const isInsideDollars = (dollarCountBefore % 2 !== 0);
+
+  let toInsert = formulaText;
+  if (!isInsideDollars) {
+    toInsert = `$${formulaText}$`;
+  } else if (!isRawSymbol && toInsert.startsWith("$") && toInsert.endsWith("$")) {
+    toInsert = toInsert.slice(1, -1);
+  }
+
+  input.value = val.substring(0, start) + toInsert + val.substring(end);
+  const newPos = start + toInsert.length;
+  input.selectionStart = input.selectionEnd = newPos;
   input.focus();
+  triggerRealtimeValidation();
+}
+
+/**
+ * 한글 및 일반 기호(루트, 분수, ^)를 표준 LaTeX 수식으로 자동 변환
+ */
+function autoConvertNaturalMath() {
+  const input = state.lastFocusedInput || document.getElementById("input-question-text");
+  if (!input || !input.value.trim()) {
+    showToast("변환할 내용이 입력창에 없습니다.", "info");
+    return;
+  }
+
+  let text = input.value;
+
+  // 1. 한국어 분수 변환: "3분의 1", "3분의1" -> \frac{1}{3}
+  text = text.replace(/([0-9a-zA-Z]+)\s*분의\s*([0-9a-zA-Z]+)/g, "\\frac{$2}{$1}");
+
+  // 2. 슬래시 분수 변환: "1/2" -> \frac{1}{2}
+  text = text.replace(/([0-9a-zA-Z]+)\s*\/\s*([0-9a-zA-Z]+)/g, "\\frac{$1}{$2}");
+
+  // 3. 한국어 루트 변환: "루트 18", "루트(18)", "루트18" -> \sqrt{18}
+  text = text.replace(/루트\s*\(?([0-9a-zA-Z]+)\)?/g, "\\sqrt{$1}");
+
+  // 4. 거듭제곱 변환: x^2, x^10
+  text = text.replace(/([a-zA-Z0-9])\^([0-9]{2,})/g, "$1^{$2}");
+
+  // 5. 곱셈/나눗셈 기호 변환: * -> \times
+  text = text.replace(/\s*\*\s*/g, " \\times ");
+
+  // 6. 전체 문장이 하나의 방정식/수식 형태인데 $...$가 없으면 $...$ 자동 감싸기
+  if (!text.includes("$") && (text.includes("\\frac") || text.includes("\\sqrt") || text.includes("^") || text.includes("="))) {
+    text = `$${text}$`;
+  }
+
+  input.value = text;
+  triggerRealtimeValidation();
+  showToast("수학 공식이 표준 LaTeX 문법으로 자동 변환되었습니다! ✨", "success");
 }
 
 function addOptionInput(value = "", isCorrect = false) {
@@ -302,6 +403,8 @@ function bindOptionsEvents() {
     };
 
     const textInput = item.querySelector(".option-input");
+    textInput.onfocus = () => { state.lastFocusedInput = textInput; };
+    textInput.onclick = () => { state.lastFocusedInput = textInput; };
     textInput.oninput = () => triggerRealtimeValidation();
   });
 }
@@ -351,9 +454,9 @@ function triggerRealtimeValidation() {
     // 1. 사전 검증 인스펙터 UI 갱신
     renderValidationInspector(result);
 
-    // 2. 태블릿 뷰어 실시간 렌더링
+    // 2. 태블릿 뷰어 및 즉시 수식 미리보기 실시간 렌더링
     renderLiveTabletPreview(data);
-  }, 120);
+  }, 100);
 }
 
 function renderValidationInspector(result) {
@@ -389,6 +492,16 @@ function renderLiveTabletPreview(data) {
   const optionsGroup = document.getElementById("tablet-options-group");
   const gradeBadge = document.getElementById("tablet-grade-badge");
   const explanationBox = document.getElementById("tablet-explanation-box");
+  const instantPreviewEl = document.getElementById("q-text-math-render");
+
+  // 문제 입력창 바로 아래 실시간 수식 뷰 업데이트
+  if (instantPreviewEl) {
+    if (data.question_text && data.question_text.trim()) {
+      instantPreviewEl.innerHTML = renderMathText(data.question_text);
+    } else {
+      instantPreviewEl.innerHTML = '<span style="color: var(--text-dim);">(문제를 입력하면 수식이 여기에 즉시 렌더링됩니다)</span>';
+    }
+  }
 
   if (!qTextEl || !optionsGroup) return;
 

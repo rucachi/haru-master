@@ -461,18 +461,61 @@ textarea.form-control {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   color: var(--accent-cyan);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  padding: 3px 8px;
-  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  padding: 4px 9px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .latex-btn:hover {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.latex-btn .katex {
+  font-size: 0.88em;
+}
+
+/* Math Instant Preview Box directly under input */
+.math-instant-preview {
+  margin-top: 6px;
+  background: rgba(15, 23, 42, 0.75);
+  border-left: 3px solid var(--accent-cyan);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #e2e8f0;
+}
+
+.math-instant-preview .preview-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  white-space: nowrap;
+}
+
+.math-instant-preview .preview-content {
+  flex: 1;
+  min-height: 20px;
+  line-height: 1.5;
+}
+
+/* Math Wizard Section */
+.math-wizard-section {
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
 }
 
 /* Options Editor */

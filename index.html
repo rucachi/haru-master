@@ -139,19 +139,37 @@
               <span class="label-tip">수학 수식은 $...$ 로 감싸면 자동 렌더링됩니다</span>
             </label>
             
-            <!-- 수학 수식 퀵 툴바 -->
-            <div class="latex-toolbar">
-              <span class="latex-toolbar-label">수식 도구:</span>
-              <button type="button" class="latex-btn" data-latex="$x^2$">$x^2$</button>
-              <button type="button" class="latex-btn" data-latex="$\frac{a}{b}$">$\frac{a}{b}$</button>
-              <button type="button" class="latex-btn" data-latex="$\sqrt{x}$">$\sqrt{x}$</button>
-              <button type="button" class="latex-btn" data-latex="$\alpha, \beta$">$\alpha, \beta$</button>
-              <button type="button" class="latex-btn" data-latex="$\pm$">&plusmn;</button>
-              <button type="button" class="latex-btn" data-latex="$\times$">&times;</button>
-              <button type="button" class="latex-btn" data-latex="$a \le b$">&le;</button>
+            <!-- 수학 수식 퀵 툴바 (향상된 수식 빌더) -->
+            <div class="latex-toolbar" id="math-toolbar">
+              <span class="latex-toolbar-label">📐 수학 도구:</span>
+              <button type="button" class="latex-btn math-render-btn" data-latex="\frac{a}{b}" title="분수 만들기">분수</button>
+              <button type="button" class="latex-btn math-render-btn" data-latex="\sqrt{x}" title="루트(제곱근) 만들기">루트</button>
+              <button type="button" class="latex-btn math-render-btn" data-latex="x^2" title="거듭제곱">제곱</button>
+              <button type="button" class="latex-btn" data-raw="\pm" title="플러스마이너스">&plusmn;</button>
+              <button type="button" class="latex-btn" data-raw="\times" title="곱하기">&times;</button>
+              <button type="button" class="latex-btn" data-raw="\div" title="나누기">&divide;</button>
+              <button type="button" class="latex-btn" data-raw="\le" title="작거나 같다">&le;</button>
+              <button type="button" class="latex-btn" data-raw="\ge" title="크거나 같다">&ge;</button>
+              <button type="button" class="latex-btn" data-raw="\ne" title="같지 않다">&ne;</button>
+              <button type="button" class="latex-btn" data-raw="\alpha" title="알파">&alpha;</button>
+              <button type="button" class="latex-btn" data-raw="\beta" title="베타">&beta;</button>
+              <button type="button" class="latex-btn" data-raw="\pi" title="파이">&pi;</button>
+              <button type="button" class="latex-btn" data-raw="^\circ" title="도(각도)">30&deg;</button>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 8px; margin-left: auto;" id="btn-open-math-wizard">
+                🧮 분수/루트 간편입력
+              </button>
+              <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 8px;" id="btn-auto-math">
+                ✨ 쉬운 수식 자동변환
+              </button>
             </div>
 
             <textarea id="input-question-text" class="form-control" rows="3" placeholder="문제를 입력하세요. 예: 이차방정식 $x^2 - 5x + 6 = 0$ 의 두 근의 합은?"></textarea>
+            
+            <!-- 실시간 즉시 렌더링 미리보기 박스 -->
+            <div class="math-instant-preview" id="q-text-instant-preview">
+              <span class="preview-tag">👀 수식 실시간 확인:</span>
+              <span class="preview-content" id="q-text-math-render">(문제를 입력하면 수식이 여기에 즉시 표시됩니다)</span>
+            </div>
           </div>
 
           <!-- 보기 (Options) 편집기 -->
@@ -480,6 +498,66 @@
         <button type="button" class="btn btn-secondary modal-close-btn">
           닫기
         </button>
+      </div>
+    </div>
+  <!-- 3. 수학 수식 간편 마법사 모달 -->
+  <div class="modal-overlay" id="modal-math-wizard">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">🧮 수학 수식 간편 마법사</h3>
+        <button type="button" class="modal-close-btn">✕</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+        LaTeX 기호를 몰라도 숫자만 입력하면 즉시 공식으로 만들어 원하는 입력칸에 넣어드립니다.
+      </p>
+
+      <!-- 1: 분수 -->
+      <div class="math-wizard-section">
+        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
+          <span>1. 분수 만들기</span> <span style="font-size: 0.8rem; color: var(--text-dim);">(예: $\frac{1}{2}$, $\frac{a}{b}$)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="text" id="wiz-frac-num" class="form-control" style="width: 110px;" placeholder="분자 (예: 1)">
+          <span style="font-size: 1.2rem; font-weight: bold; color: var(--text-dim);">/</span>
+          <input type="text" id="wiz-frac-den" class="form-control" style="width: 110px;" placeholder="분모 (예: 2)">
+          <button type="button" class="btn btn-primary" style="font-size: 0.82rem; padding: 6px 14px;" id="wiz-btn-insert-frac">
+            분수 삽입
+          </button>
+        </div>
+      </div>
+
+      <!-- 2: 제곱근/루트 -->
+      <div class="math-wizard-section" style="margin-top: 1.25rem;">
+        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--accent-emerald); display: flex; align-items: center; gap: 6px;">
+          <span>2. 루트(제곱근) 만들기</span> <span style="font-size: 0.8rem; color: var(--text-dim);">(예: $\sqrt{18}$, $3\sqrt{2}$)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="text" id="wiz-sqrt-coef" class="form-control" style="width: 80px;" placeholder="앞 계수">
+          <span style="font-size: 1.2rem; font-weight: bold; color: var(--text-dim);">&radic;</span>
+          <input type="text" id="wiz-sqrt-val" class="form-control" style="width: 130px;" placeholder="루트 안 (예: 18)">
+          <button type="button" class="btn btn-primary" style="font-size: 0.82rem; padding: 6px 14px;" id="wiz-btn-insert-sqrt">
+            루트 삽입
+          </button>
+        </div>
+      </div>
+
+      <!-- 3: 거듭제곱 -->
+      <div class="math-wizard-section" style="margin-top: 1.25rem;">
+        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--accent-amber); display: flex; align-items: center; gap: 6px;">
+          <span>3. 거듭제곱 만들기</span> <span style="font-size: 0.8rem; color: var(--text-dim);">(예: $x^2$, $a^3$)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <input type="text" id="wiz-pow-base" class="form-control" style="width: 110px;" placeholder="밑 (예: x)">
+          <span style="font-size: 1.1rem; font-weight: bold; color: var(--text-dim);">^</span>
+          <input type="text" id="wiz-pow-exp" class="form-control" style="width: 90px;" placeholder="지수 (예: 2)">
+          <button type="button" class="btn btn-primary" style="font-size: 0.82rem; padding: 6px 14px;" id="wiz-btn-insert-pow">
+            제곱 삽입
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.75rem; display: flex; justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary modal-close-btn">닫기</button>
       </div>
     </div>
   </div>
