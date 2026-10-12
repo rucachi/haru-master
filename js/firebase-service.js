@@ -2,7 +2,7 @@ import { FIREBASE_CONFIG } from './firebase-config.js';
 
 let fbApp = null;
 let firestoreDb = null;
-let fbDoc, fbSetDoc, fbGetDoc, fbGetDocs, fbCollection, fbDeleteDoc;
+let fbDoc, fbSetDoc, fbGetDoc, fbGetDocs, fbCollection, fbDeleteDoc, fbWriteBatch;
 
 async function initCloudFirestore() {
   if (firestoreDb) return firestoreDb;
@@ -15,6 +15,7 @@ async function initCloudFirestore() {
     fbGetDocs = firestoreModule.getDocs;
     fbCollection = firestoreModule.collection;
     fbDeleteDoc = firestoreModule.deleteDoc;
+    fbWriteBatch = firestoreModule.writeBatch;
 
     fbApp = initializeApp(FIREBASE_CONFIG);
     firestoreDb = firestoreModule.getFirestore(fbApp);
@@ -547,29 +548,49 @@ export class HaruMasterDB {
     }
   }
 
-  async syncQuestionsToRemoteFirestore() {
-    if (!this.db || !fbSetDoc || !fbDoc) return;
+  async syncQuestionsToRemoteFirestore(onProgress = null) {
+    if (!this.db || !fbDoc) return;
     try {
       const qEntries = Object.entries(this.data.questions);
-      console.log(`🔥 [Cloud Firestore] ${qEntries.length}개 문항 클라우드 동기화 시작...`);
-      for (const [qid, q] of qEntries) {
-        await fbSetDoc(fbDoc(this.db, "Questions", qid), q, { merge: true });
+      const total = qEntries.length;
+      console.log(`🔥 [Cloud Firestore] ${total}개 문항 고속 배치 동기화 시작...`);
+
+      const BATCH_SIZE = 300; // Firestore 500개 한도 대비 안전한 300단위 분할
+      let completed = 0;
+
+      for (let i = 0; i < total; i += BATCH_SIZE) {
+        const chunk = qEntries.slice(i, i + BATCH_SIZE);
+        if (fbWriteBatch) {
+          const batch = fbWriteBatch(this.db);
+          for (const [qid, q] of chunk) {
+            batch.set(fbDoc(this.db, "Questions", qid), q, { merge: true });
+          }
+          await batch.commit();
+        } else if (fbSetDoc) {
+          await Promise.all(chunk.map(([qid, q]) => fbSetDoc(fbDoc(this.db, "Questions", qid), q, { merge: true })));
+        }
+        completed += chunk.length;
+        if (onProgress) onProgress(completed, total);
+        console.log(`[Firestore 동기화 진행] ${completed} / ${total}`);
       }
-      console.log(`✅ [Cloud Firestore] 문항 클라우드 동기화 완료!`);
+      console.log(`✅ [Cloud Firestore] ${total}개 문항 초고속 클라우드 동기화 완료!`);
     } catch (err) {
       console.warn("원격 Firestore 동기화 중 오류 (로컬 보존됨):", err);
     }
   }
 
   /**
-   * 9월 3일 개학 진도 반영 860문항 (나경 480 / 차혜 380) 원클릭 로드 및 동기화
+   * 9월 3일 개학 진도 반영 860문항 (나경 480 / 차혜 380) 원클릭 로드 및 고속 동기화
    */
-  async loadCurriculum860() {
+  async loadCurriculum860(onProgress = null) {
     try {
       const res = await fetch("study_data/all_curriculum_questions_860.json");
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const list = await res.json();
       const count = await this.importJSON(JSON.stringify(list));
+      if (count && this.db) {
+        await this.syncQuestionsToRemoteFirestore(onProgress);
+      }
       return count;
     } catch (err) {
       console.error("860문항 로드 실패:", err);

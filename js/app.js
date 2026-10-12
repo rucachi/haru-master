@@ -1137,11 +1137,13 @@ function initBatchTools() {
     btn860.addEventListener("click", async () => {
       btn860.disabled = true;
       const originalText = btn860.innerHTML;
-      btn860.innerHTML = `<span>⏳</span> 860문항 탑재 및 Firebase 동기화 진행 중...`;
+      btn860.innerHTML = `<span>⏳</span> 860문항 탑재 시작...`;
       try {
-        const count = await dbService.loadCurriculum860();
+        const count = await dbService.loadCurriculum860((done, total) => {
+          btn860.innerHTML = `<span>⏳</span> Firebase 고속 동기화 중... (${done} / ${total})`;
+        });
         if (count) {
-          showToast(`🎉 2학기 개학 진도 860문항 탑재 완료! (Firebase 클라우드 연동됨)`, "success");
+          showToast(`🎉 2학기 860문항 초고속 클라우드 동기화 완료!`, "success");
           renderAllViews();
         } else {
           showToast("문항 데이터 로드에 실패했습니다.", "error");
