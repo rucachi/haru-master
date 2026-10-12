@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>하루마스터 (HaruMaster) - 아빠용 에듀테크 관제 대시보드</title>
-  <meta name="description" content="중학교 1학년, 3학년 자녀를 위한 일일 과제 출제 및 에빙하우스 망각곡선(SRS) 자동 복습 통합 관리 시스템">
+  <title>하루마스터 (HaruMaster) - 아빠용 학습 모니터링 관제 대시보드</title>
+  <meta name="description" content="나경이(중3)와 차혜(중1)의 일일 학습 현황, 과목별 정답률/오답률 그래프, AI 취약점 진단 및 에빙하우스 SRS 망각곡선 모니터링">
   <meta name="theme-color" content="#0a0f1d">
 
   <!-- Google Web Fonts & Typography -->
@@ -12,11 +12,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Pretendard:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- KaTeX (수학 수식 렌더링 엔진) CDN -->
+  <!-- KaTeX (수학 수식 렌더링) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 
-  <!-- Main Styling -->
+  <!-- Chart.js (인터랙티브 그래프 라이브러리) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Dashboard Styling -->
   <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
@@ -26,617 +29,306 @@
     <div class="brand-wrapper">
       <div class="brand-icon">🧠</div>
       <div class="brand-title-wrap">
-        <h1>하루마스터 <span class="brand-badge">Dad Admin</span></h1>
-        <div class="brand-subtitle">자녀 맞춤형 일일 과제 & 에빙하우스(SRS) 스마트 복습 관제</div>
+        <h1>하루마스터 <span class="brand-badge">Dad Monitoring</span></h1>
+        <div class="brand-subtitle">자녀 학습 상태 & 과목별 정답률 AI 분석 관제 센터</div>
       </div>
     </div>
 
     <div class="header-actions">
+      <!-- 11월 1일 중간고사 D-Day 배지 -->
+      <div class="dday-badge" id="exam-dday-badge">
+        <span class="dday-fire">🔥</span>
+        <span class="dday-text">11월 1일 중간고사 <strong id="dday-count">D-19</strong></span>
+      </div>
+
       <!-- 자녀 선택기 (나경이 / 차혜) -->
       <div class="student-selector-badge" id="student-selector">
-        <button type="button" class="student-btn" data-student="chahye">
-          <span>👦</span> 둘째 차혜 (중1)
+        <button type="button" class="student-btn active" data-student="nakyung" id="btn-select-nakyung">
+          <span>👧</span> 나경이 (중3)
         </button>
-        <button type="button" class="student-btn active" data-student="nakyung">
-          <span>👧</span> 첫째 나경이 (중3)
+        <button type="button" class="student-btn" data-student="chahye" id="btn-select-chahye">
+          <span>👦</span> 차혜 (중1)
         </button>
       </div>
 
       <!-- 자녀 전용 태블릿 웹앱 바로가기 -->
-      <div class="child-links-wrap" style="display: flex; gap: 6px;">
-        <a href="nakyung.html" target="_blank" class="btn btn-secondary" style="font-size: 0.76rem; padding: 5px 11px; border-color: rgba(168, 85, 247, 0.4); color: #c084fc; text-decoration: none;" title="나경이 전용 태블릿 화면 열기">
+      <div class="child-links-wrap">
+        <a href="nakyung.html" target="_blank" class="child-room-btn nakyung" title="나경이 태블릿 방 열기">
           👧 나경이 방 ↗
         </a>
-        <a href="chahye.html" target="_blank" class="btn btn-secondary" style="font-size: 0.76rem; padding: 5px 11px; border-color: rgba(6, 182, 212, 0.4); color: #22d3ee; text-decoration: none;" title="차혜 전용 태블릿 화면 열기">
+        <a href="chahye.html" target="_blank" class="child-room-btn chahye" title="차혜 태블릿 방 열기">
           👦 차혜 방 ↗
         </a>
       </div>
 
       <!-- DB 상태 -->
-      <div class="db-status-pill mock" id="db-status-pill" title="클릭하여 Firebase 설정 열기">
+      <div class="db-status-pill" id="db-status-pill">
         <span class="status-dot"></span>
-        <span id="db-status-text">인메모리 Mock DB</span>
+        <span id="db-status-text">Cloud Firestore</span>
       </div>
-
-      <!-- 설정 버튼 -->
-      <button type="button" class="icon-btn" id="btn-open-settings" title="Firebase 설정 및 데이터 관리">
-        ⚙️
-      </button>
     </div>
   </header>
 
-  <!-- Navigation Bar -->
-  <nav class="app-nav">
-    <button type="button" class="nav-tab active" data-tab="studio">
-      <span>🛡️</span> 오류 방지 출제 스튜디오
-    </button>
-    <button type="button" class="nav-tab" data-tab="overview">
-      <span>📊</span> 자녀 학습 현황
-    </button>
-    <button type="button" class="nav-tab" data-tab="reviews">
-      <span>🧠</span> SRS 망각곡선 & 오답노트
-      <span class="badge-count" id="nav-wrong-badge">HOT</span>
-    </button>
-    <button type="button" class="nav-tab" data-tab="batch">
-      <span>📁</span> 일괄 업로드 & 데이터
-    </button>
-  </nav>
+  <!-- 메인 모니터링 레이아웃 -->
+  <main class="monitor-container">
 
-  <!-- Main Content Areas -->
-  <main class="app-main">
+    <!-- 상단 컨트롤 행: 기간 필터 (일일 / 주간 / 월간) + 새로고침 -->
+    <div class="monitor-control-row">
+      <div class="time-filter-group" id="time-filter-group">
+        <button type="button" class="time-tab active" data-horizon="daily">
+          <span>📅</span> 일일 현황 (Today)
+        </button>
+        <button type="button" class="time-tab" data-horizon="weekly">
+          <span>📊</span> 주간 분석 (Weekly)
+        </button>
+        <button type="button" class="time-tab" data-horizon="monthly">
+          <span>📈</span> 월간 진도 (Monthly)
+        </button>
+      </div>
 
-    <!-- =========================================================================
-         TAB 1: 오류 방지 문제 출제 스튜디오 (Studio Pane)
-         ========================================================================= -->
-    <section class="tab-pane active" id="tab-studio">
-      <div class="studio-grid">
-        
-        <!-- 좌측: 아빠의 안심 출제 입력 패널 -->
-        <div class="glass-card">
-          <div class="card-header-row">
-            <h2 class="card-title"><span>✍️</span> 문항 작성 & 사전 비행 검증기</h2>
-            <div style="display: flex; gap: 8px;">
-              <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" id="btn-open-parser">
-                📋 텍스트 자동 파서
-              </button>
-              <button type="button" class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" id="btn-load-template">
-                ⚡ 과목 템플릿 로드
-              </button>
+      <div class="control-actions">
+        <span class="last-sync-time" id="last-sync-text">동기화 완료</span>
+        <button type="button" class="btn-refresh" id="btn-refresh-stats" title="데이터 새로고침">
+          🔄 실시간 갱신
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. 핵심 KPI 카드 4종 -->
+    <section class="kpi-grid">
+      <!-- KPI 1: 학습 문항 수 & 완수율 -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title" id="kpi-title-solved">오늘 완료 문항</span>
+          <span class="kpi-icon-wrap icon-blue">📝</span>
+        </div>
+        <div class="kpi-main-val">
+          <span id="kpi-solved-val">20</span>
+          <span class="kpi-sub-unit" id="kpi-target-val">/ 20 문항</span>
+        </div>
+        <div class="kpi-footer">
+          <div class="kpi-progress-bar">
+            <div class="kpi-progress-fill" id="kpi-progress-fill" style="width: 100%;"></div>
+          </div>
+          <span class="kpi-badge pass" id="kpi-status-badge">✓ 일일 목표 달성</span>
+        </div>
+      </div>
+
+      <!-- KPI 2: 평균 정답률 & 오답률 -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">평균 정답률</span>
+          <span class="kpi-icon-wrap icon-emerald">🎯</span>
+        </div>
+        <div class="kpi-main-val">
+          <span id="kpi-accuracy-val">90</span><span class="kpi-sub-unit">%</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-desc">
+            정답 <strong id="kpi-correct-cnt" class="text-emerald">18</strong>개 · 
+            오답 <strong id="kpi-wrong-cnt" class="text-rose">2</strong>개
+          </span>
+          <span class="kpi-badge rate-badge" id="kpi-rate-badge">우수 (A등급)</span>
+        </div>
+      </div>
+
+      <!-- KPI 3: 연속 학습 스트릭 -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">연속 학습 기록</span>
+          <span class="kpi-icon-wrap icon-amber">🔥</span>
+        </div>
+        <div class="kpi-main-val">
+          <span id="kpi-streak-val">5</span><span class="kpi-sub-unit">일 연속</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-desc">꾸준한 학습 습관 유지 중!</span>
+          <span class="kpi-badge flame">🔥 습관 마스터</span>
+        </div>
+      </div>
+
+      <!-- KPI 4: 에빙하우스 장기기억 마스터 -->
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">장기기억 마스터 (14일+)</span>
+          <span class="kpi-icon-wrap icon-purple">🏆</span>
+        </div>
+        <div class="kpi-main-val">
+          <span id="kpi-mastered-val">38</span><span class="kpi-sub-unit">문항</span>
+        </div>
+        <div class="kpi-footer">
+          <span class="kpi-desc">망각곡선 주기 완전 극복</span>
+          <span class="kpi-badge purple">SRS 완전 정착</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 시각적 그래프 분석 영역 (과목별 정답/오답 비교 + 기간별 학습 추이) -->
+    <section class="charts-grid">
+      <!-- 차트 1: 과목별 정답률 & 오답률 분석 -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <h2 class="chart-card-title">📊 과목별 정답률 vs 오답률 비교</h2>
+            <div class="chart-card-sub" id="chart-sub-accuracy">과목별 성취도 및 오답 비중을 비교합니다</div>
+          </div>
+          <div class="chart-legend-custom">
+            <span class="legend-item"><span class="dot-correct"></span> 정답률</span>
+            <span class="legend-item"><span class="dot-wrong"></span> 오답률</span>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-subject-accuracy"></canvas>
+        </div>
+      </div>
+
+      <!-- 차트 2: 기간별 학습량 및 진도 추이 -->
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <h2 class="chart-card-title" id="chart-trend-title">📈 주간 요일별 학습 추이</h2>
+            <div class="chart-card-sub" id="chart-trend-sub">최근 7일간의 학습량 달성도를 보여줍니다</div>
+          </div>
+          <span class="chart-badge-goal" id="chart-badge-goal">일일 20문제 기준</span>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-learning-trend"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 🤖 AI 안티그래비티의 학습 진단 리포트 & 아빠 코칭 가이드 (핵심!) -->
+    <section class="ai-insight-section">
+      <div class="ai-insight-card">
+        <div class="ai-insight-header">
+          <div class="ai-bot-avatar">🤖</div>
+          <div class="ai-header-titles">
+            <h2 class="ai-insight-title">
+              AI 안티그래비티의 맞춤 학습 진단 리포트
+              <span class="ai-pulse-tag">실시간 데이터 분석</span>
+            </h2>
+            <div class="ai-insight-sub">
+              <strong id="ai-student-name">나경이</strong>의 최근 풀이 데이터와 오답 패턴을 분석한 코칭 가이드입니다.
             </div>
           </div>
-
-          <!-- 과목 선택 바 -->
-          <div class="subject-pill-group">
-            <button type="button" class="sub-pill active" data-sub="수학">📐 수학</button>
-            <button type="button" class="sub-pill" data-sub="국어">📖 국어</button>
-            <button type="button" class="sub-pill" data-sub="영어">🌐 영어</button>
-            <button type="button" class="sub-pill" data-sub="과학">🔬 과학</button>
-            <button type="button" class="sub-pill" data-sub="사회">🌍 사회</button>
-            <button type="button" class="sub-pill" data-sub="역사">🏛️ 역사</button>
-          </div>
-
-          <!-- 기본 메타데이터 -->
-          <div class="form-row-2">
-            <div class="form-group">
-              <label class="form-label" for="input-grade">대상 학년</label>
-              <select id="input-grade" class="form-control">
-                <option value="1">중학교 1학년 (중1)</option>
-                <option value="3" selected>중학교 3학년 (중3)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="input-assign-date">
-                과제 배정 일자
-                <span class="label-tip">YYYYMMDD</span>
-              </label>
-              <input type="text" id="input-assign-date" class="form-control" placeholder="예: 20261013">
-            </div>
-          </div>
-
-          <!-- 국어/영어 긴 지문 (Passage) -->
-          <div class="form-group">
-            <label class="form-label" for="input-passage">
-              지문 (Passage)
-              <span class="label-tip">국어·영어 등 본문이 필요한 경우 입력 (선택)</span>
-            </label>
-            <textarea id="input-passage" class="form-control" rows="3" placeholder="지문이나 본문 내용을 입력하세요. 줄바꿈이 태블릿에 그대로 유지됩니다."></textarea>
-          </div>
-
-          <!-- 문제 본문 & LaTeX 수식 툴바 -->
-          <div class="form-group">
-            <label class="form-label" for="input-question-text">
-              문제 본문 (Question Text)
-              <span class="label-tip">수학 수식은 $...$ 로 감싸면 자동 렌더링됩니다</span>
-            </label>
-            
-            <!-- 수학 수식 퀵 툴바 (향상된 수식 빌더) -->
-            <div class="latex-toolbar" id="math-toolbar">
-              <span class="latex-toolbar-label">📐 수학 도구:</span>
-              <button type="button" class="latex-btn math-render-btn" data-latex="\frac{a}{b}" title="분수 만들기">분수</button>
-              <button type="button" class="latex-btn math-render-btn" data-latex="\sqrt{x}" title="루트(제곱근) 만들기">루트</button>
-              <button type="button" class="latex-btn math-render-btn" data-latex="x^2" title="거듭제곱">제곱</button>
-              <button type="button" class="latex-btn" data-raw="\pm" title="플러스마이너스">&plusmn;</button>
-              <button type="button" class="latex-btn" data-raw="\times" title="곱하기">&times;</button>
-              <button type="button" class="latex-btn" data-raw="\div" title="나누기">&divide;</button>
-              <button type="button" class="latex-btn" data-raw="\le" title="작거나 같다">&le;</button>
-              <button type="button" class="latex-btn" data-raw="\ge" title="크거나 같다">&ge;</button>
-              <button type="button" class="latex-btn" data-raw="\ne" title="같지 않다">&ne;</button>
-              <button type="button" class="latex-btn" data-raw="\alpha" title="알파">&alpha;</button>
-              <button type="button" class="latex-btn" data-raw="\beta" title="베타">&beta;</button>
-              <button type="button" class="latex-btn" data-raw="\pi" title="파이">&pi;</button>
-              <button type="button" class="latex-btn" data-raw="^\circ" title="도(각도)">30&deg;</button>
-              <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 8px; margin-left: auto;" id="btn-open-math-wizard">
-                🧮 분수/루트 간편입력
-              </button>
-              <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 8px;" id="btn-auto-math">
-                ✨ 쉬운 수식 자동변환
-              </button>
-            </div>
-
-            <textarea id="input-question-text" class="form-control" rows="3" placeholder="문제를 입력하세요. 예: 이차방정식 $x^2 - 5x + 6 = 0$ 의 두 근의 합은?"></textarea>
-            
-            <!-- 실시간 즉시 렌더링 미리보기 박스 -->
-            <div class="math-instant-preview" id="q-text-instant-preview">
-              <span class="preview-tag">👀 수식 실시간 확인:</span>
-              <span class="preview-content" id="q-text-math-render">(문제를 입력하면 수식이 여기에 즉시 표시됩니다)</span>
-            </div>
-          </div>
-
-          <!-- 도형 및 과학 실험 그림 첨부 영역 -->
-          <div class="form-group">
-            <div class="form-label">
-              <span>🖼️ 그림·도형·실험 장치 첨부 (선택)</span>
-              <div style="display: flex; gap: 5px;">
-                <button type="button" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 7px;" id="btn-preset-triangle">📐 직각삼각형</button>
-                <button type="button" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 7px;" id="btn-preset-science">🔬 실험 장치도</button>
-                <button type="button" class="btn btn-secondary" style="font-size: 0.72rem; padding: 2px 7px;" id="btn-preset-graph">📈 좌표 그래프</button>
-              </div>
-            </div>
-
-            <!-- 이미지 업로드 & 붙여넣기 드롭존 -->
-            <div class="diagram-dropzone" id="diagram-dropzone" tabindex="0">
-              <div class="diagram-drop-idle" id="diagram-drop-idle">
-                <span style="font-size: 1.5rem;">📷</span>
-                <div style="font-weight: 600; font-size: 0.88rem; margin: 4px 0;">
-                  캡처 후 <strong>Ctrl + V</strong> 로 바로 붙여넣기 or 이미지 파일 드래그
-                </div>
-                <div style="font-size: 0.75rem; color: var(--text-dim);">
-                  클릭하여 이미지 파일 선택 (.png, .jpg, .svg, .webp)
-                </div>
-              </div>
-
-              <!-- 이미지 미리보기 박스 -->
-              <div class="diagram-preview-box" id="diagram-preview-box" style="display: none;">
-                <img id="diagram-preview-img" src="" alt="도형 및 과학 실험 그림 미리보기">
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 3px 10px; color: var(--accent-rose);" id="btn-remove-diagram">
-                    ✕ 그림 삭제
-                  </button>
-                </div>
-              </div>
-            </div>
-            <input type="file" id="diagram-file-input" accept="image/*" style="display: none;">
-            <input type="hidden" id="input-image-url" value="">
-          </div>
-
-          <!-- 보기 (Options) 편집기 -->
-          <div class="form-group">
-            <div class="form-label">
-              <span>선택지 보기 (Options) & 정답 번호 선택</span>
-              <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 2px 8px;" id="btn-add-option">
-                + 보기 추가
-              </button>
-            </div>
-            <div class="options-list" id="options-container">
-              <div class="option-item" data-index="1">
-                <input type="radio" name="opt_correct_radio" class="option-radio" title="정답으로 지정">
-                <span class="option-index">1</span>
-                <input type="text" class="option-input" placeholder="보기 1 내용 입력..." value="$-6$">
-                <button type="button" class="btn-remove-opt">✕</button>
-              </div>
-              <div class="option-item" data-index="2">
-                <input type="radio" name="opt_correct_radio" class="option-radio" title="정답으로 지정">
-                <span class="option-index">2</span>
-                <input type="text" class="option-input" placeholder="보기 2 내용 입력..." value="$-5$">
-                <button type="button" class="btn-remove-opt">✕</button>
-              </div>
-              <div class="option-item" data-index="3">
-                <input type="radio" name="opt_correct_radio" class="option-radio" title="정답으로 지정">
-                <span class="option-index">3</span>
-                <input type="text" class="option-input" placeholder="보기 3 내용 입력..." value="$1$">
-                <button type="button" class="btn-remove-opt">✕</button>
-              </div>
-              <div class="option-item correct" data-index="4">
-                <input type="radio" name="opt_correct_radio" class="option-radio" checked title="정답으로 지정">
-                <span class="option-index">4</span>
-                <input type="text" class="option-input" placeholder="보기 4 내용 입력..." value="$5$">
-                <button type="button" class="btn-remove-opt">✕</button>
-              </div>
-              <div class="option-item" data-index="5">
-                <input type="radio" name="opt_correct_radio" class="option-radio" title="정답으로 지정">
-                <span class="option-index">5</span>
-                <input type="text" class="option-input" placeholder="보기 5 내용 입력..." value="$6$">
-                <button type="button" class="btn-remove-opt">✕</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 정답 해설 (Explanation) -->
-          <div class="form-group">
-            <label class="form-label" for="input-explanation">
-              정답 해설 (Explanation)
-              <span class="label-tip">아이들의 SRS 오답 복습 시 제공되는 핵심 설명</span>
-            </label>
-            <textarea id="input-explanation" class="form-control" rows="2" placeholder="정답 풀이 및 해설을 입력하세요. 수식($...$)도 사용 가능합니다."></textarea>
-          </div>
-
-          <!-- 사전 비행 검증기 인스펙터 (Pre-flight Inspector) -->
-          <div class="validation-inspector">
-            <div class="validation-header">
-              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted);">
-                🔍 실시간 무결성 사전 검사 (Pre-flight Check)
-              </span>
-              <span class="validation-badge pass" id="validation-status-badge">✓ 검증 통과</span>
-            </div>
-            <div class="validation-items-list" id="validation-items-list">
-              <!-- 검증 결과 항목 동적 렌더링 -->
-            </div>
-          </div>
-
-          <!-- 등록 액션 버튼 -->
-          <div class="form-actions-row">
-            <button type="button" class="btn btn-primary" id="btn-save-question" style="flex: 1;">
-              <span>💾</span> 문항 검증 완료 & 과제 등록
-            </button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.reload()">
-              <span>🔄</span> 초기화
-            </button>
-          </div>
-
         </div>
 
-        <!-- 우측: 📱 아이들 태블릿 실시간 뷰어 (Live Emulator) -->
-        <div class="tablet-frame-wrapper">
-          <div style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
-              <span>📱</span> 아이들 태블릿 실제 화면 (Live Preview)
+        <div class="ai-insight-body-grid">
+          <!-- 강점 분석 -->
+          <div class="ai-block strength-block">
+            <div class="ai-block-label text-emerald">
+              <span>💡</span> 강점 및 우수 영역 (High Mastery)
             </div>
-            <span style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 600;">KaTeX 엔진 가동중</span>
+            <div class="ai-block-content" id="ai-strength-text">
+              분석 데이터를 불러오는 중입니다...
+            </div>
           </div>
 
-          <div class="tablet-device">
-            <div class="tablet-camera-dot"></div>
-            
-            <!-- 태블릿 상태바 -->
-            <div class="tablet-status-bar">
-              <span>09:41</span>
-              <span>🔋 98% · Wi-Fi 5G</span>
+          <!-- 취약점 분석 -->
+          <div class="ai-block weakness-block">
+            <div class="ai-block-label text-rose">
+              <span>⚠️</span> 취약점 및 집중 보강 단원 (Weakness Alert)
             </div>
-
-            <!-- 태블릿 뷰포트 -->
-            <div class="tablet-viewport">
-              <div class="tablet-subject-bar">
-                <span class="tablet-sub-badge" id="tablet-subject-badge">수학</span>
-                <span class="tablet-grade-badge" id="tablet-grade-badge">중3학년</span>
-              </div>
-
-              <!-- 지문 영역 -->
-              <div class="tablet-passage-box" id="tablet-passage-box" style="display: none;"></div>
-
-              <!-- 문제 본문 -->
-              <div class="tablet-q-text" id="tablet-q-text">
-                이차방정식 $x^2 - 5x + 6 = 0$ 의 두 근 $\alpha, \beta$에 대하여 $\alpha + \beta$의 값은?
-              </div>
-
-              <!-- 도형 및 과학 실험 이미지 렌더링 영역 -->
-              <div class="tablet-diagram-wrap" id="tablet-diagram-wrap" style="display: none;">
-                <img id="tablet-diagram-img" src="" alt="도형 및 과학 실험 다이어그램">
-              </div>
-
-              <!-- 보기 영역 -->
-              <div class="tablet-options-group" id="tablet-options-group">
-                <!-- 보기 버튼 동적 생성 -->
-              </div>
-
-              <!-- 해설 영역 (채점 테스트 후 표시) -->
-              <div class="tablet-explanation-box" id="tablet-explanation-box" style="display: none;"></div>
-
-              <!-- 아빠용 채점 테스트 도구 -->
-              <div class="tablet-footer-test" style="margin-top: auto;">
-                <span style="font-size: 0.75rem; color: var(--text-dim);">보기를 누르고 테스트하세요</span>
-                <div style="display: flex; gap: 6px;">
-                  <button type="button" class="btn btn-emerald" style="font-size: 0.75rem; padding: 4px 10px;" id="btn-test-grade">
-                    ✓ 채점 테스트
-                  </button>
-                  <button type="button" class="btn btn-secondary" style="font-size: 0.75rem; padding: 4px 8px;" id="btn-reset-tablet">
-                    재시도
-                  </button>
-                </div>
-              </div>
+            <div class="ai-block-content" id="ai-weakness-text">
+              분석 데이터를 불러오는 중입니다...
             </div>
+          </div>
+
+          <!-- 아빠를 위한 맞춤 코칭 가이드 -->
+          <div class="ai-block coaching-block">
+            <div class="ai-block-label text-amber">
+              <span>👨‍🏫</span> 아빠를 위한 오늘의 코칭 조언 (Dad's Action Tip)
+            </div>
+            <div class="ai-block-content" id="ai-coaching-text">
+              분석 데이터를 불러오는 중입니다...
+            </div>
+          </div>
+        </div>
+
+        <!-- 아빠의 응원 한 줄 보내기 위젯 -->
+        <div class="cheer-widget">
+          <div class="cheer-input-row">
+            <span class="cheer-icon">💌</span>
+            <input type="text" id="input-cheer-message" class="cheer-input" placeholder="나경이 태블릿으로 보낼 따뜻한 응원 메시지를 적어보세요 (예: 오늘 수학 문제 푸느라 수고했어! 최고야 ❤️)">
+            <button type="button" class="btn-send-cheer" id="btn-send-cheer">
+              응원 전송 🚀
+            </button>
+          </div>
+          <div class="cheer-status-hint" id="cheer-status-hint">
+            아이가 태블릿 학습 화면을 열었을 때 상단에 사랑의 팝업으로 표시됩니다.
           </div>
         </div>
 
       </div>
     </section>
 
-    <!-- =========================================================================
-         TAB 2: 자녀 학습 현황판 (Overview Pane)
-         ========================================================================= -->
-    <section class="tab-pane" id="tab-overview">
-      <div class="stats-cards-grid">
-        <div class="stat-card">
-          <div class="stat-icon-wrap" style="background: rgba(99, 102, 241, 0.15); color: var(--primary-light);">
-            📝
-          </div>
-          <div>
-            <div class="stat-val" id="stat-total-q">0</div>
-            <div class="stat-lbl">총 학습 문항 수</div>
-          </div>
-        </div>
+    <!-- 4. 에빙하우스 망각곡선 단계 & 최근 오답 노트 타임라인 -->
+    <section class="review-section">
+      <!-- 좌측: 망각곡선 4단계 게이지 -->
+      <div class="srs-card">
+        <h3 class="section-card-title"><span>🧠</span> 에빙하우스 망각곡선 단계별 문항 현황</h3>
+        <p class="section-card-sub">반복 주기를 거치며 단기 기억이 장기 기억으로 고착화되는 과정입니다.</p>
 
-        <div class="stat-card">
-          <div class="stat-icon-wrap" style="background: rgba(244, 63, 94, 0.15); color: var(--accent-rose);">
-            ❌
+        <div class="srs-stages-vertical">
+          <div class="srs-stage-row">
+            <div class="srs-dot dot-stage-1"></div>
+            <div class="srs-info">
+              <span class="srs-name">1단계: 1일차 즉시 복습 (오답/신규)</span>
+              <span class="srs-desc">망각이 가장 급격한 시점, 오늘 반드시 복습</span>
+            </div>
+            <div class="srs-count text-rose" id="srs-cnt-1">0개</div>
           </div>
-          <div>
-            <div class="stat-val" id="stat-wrongs">0</div>
-            <div class="stat-lbl">누적 오답 횟수</div>
-          </div>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-icon-wrap" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">
-            🏆
+          <div class="srs-stage-row">
+            <div class="srs-dot dot-stage-3"></div>
+            <div class="srs-info">
+              <span class="srs-name">2단계: 3일차 단기 기억 안착</span>
+              <span class="srs-desc">1회 정답 통과 후 기억 유지 점검</span>
+            </div>
+            <div class="srs-count text-amber" id="srs-cnt-3">0개</div>
           </div>
-          <div>
-            <div class="stat-val" id="stat-mastered">0</div>
-            <div class="stat-lbl">장기기억 마스터 문항 (14일+)</div>
-          </div>
-        </div>
 
-        <div class="stat-card">
-          <div class="stat-icon-wrap" style="background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan);">
-            📈
+          <div class="srs-stage-row">
+            <div class="srs-dot dot-stage-7"></div>
+            <div class="srs-info">
+              <span class="srs-name">3단계: 7일차 기억 정착</span>
+              <span class="srs-desc">2회 연속 정답으로 개념 구조화 단계</span>
+            </div>
+            <div class="srs-count text-cyan" id="srs-cnt-7">0개</div>
           </div>
-          <div>
-            <div class="stat-val" id="stat-rate">0%</div>
-            <div class="stat-lbl">망각곡선 완수율</div>
+
+          <div class="srs-stage-row">
+            <div class="srs-dot dot-stage-14"></div>
+            <div class="srs-info">
+              <span class="srs-name">4단계: 14일차 장기기억 마스터</span>
+              <span class="srs-desc">완전 학습 도달, 시험 전까지 잊지 않음</span>
+            </div>
+            <div class="srs-count text-emerald" id="srs-cnt-14">0개</div>
           </div>
         </div>
       </div>
 
-      <div class="glass-card">
-        <div class="card-header-row">
-          <h2 class="card-title"><span>📅</span> 배정된 일일 과제 목록</h2>
-          <span style="font-size: 0.8rem; color: var(--text-dim);">학생 태블릿과 실시간 동기화</span>
-        </div>
-        <div class="assignment-grid-cards" id="overview-assignments-grid">
-          <!-- 과제 카드 목록 렌더링 -->
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         TAB 3: SRS 망각곡선 & 오답 노트 (Reviews Pane)
-         ========================================================================= -->
-    <section class="tab-pane" id="tab-reviews">
-      <div class="glass-card" style="margin-bottom: 1.5rem;">
-        <h2 class="card-title" style="margin-bottom: 1rem;"><span>🧠</span> 에빙하우스 망각곡선 단계별 문항 분포</h2>
-        <div class="srs-stages-row">
-          <div class="srs-stage-card stage-1">
-            <div class="srs-stage-name">1일차 (즉시 복습)</div>
-            <div class="srs-stage-count" id="srs-cnt-1" style="color: var(--accent-rose);">0</div>
-            <div class="srs-stage-sub">오답 리셋 및 신규 문제</div>
+      <!-- 우측: 최근 틀린 문제 오답 노트 리스트 -->
+      <div class="wrong-answers-card">
+        <div class="wrong-header-row">
+          <div>
+            <h3 class="section-card-title"><span>❌</span> 실시간 오답 노트 & 취약 개념 리스트</h3>
+            <p class="section-card-sub">최근에 틀린 문제와 아이가 선택한 오답을 상세히 확인합니다.</p>
           </div>
-          <div class="srs-stage-card stage-3">
-            <div class="srs-stage-name">3일차 (단기 기억)</div>
-            <div class="srs-stage-count" id="srs-cnt-3" style="color: var(--accent-amber);">0</div>
-            <div class="srs-stage-sub">1회 정답 통과 문항</div>
-          </div>
-          <div class="srs-stage-card stage-7">
-            <div class="srs-stage-name">7일차 (기억 정착)</div>
-            <div class="srs-stage-count" id="srs-cnt-7" style="color: var(--accent-cyan);">0</div>
-            <div class="srs-stage-sub">2회 연속 정답 문항</div>
-          </div>
-          <div class="srs-stage-card stage-14">
-            <div class="srs-stage-name">14일차 (장기기억 마스터)</div>
-            <div class="srs-stage-count" id="srs-cnt-14" style="color: var(--accent-emerald);">0</div>
-            <div class="srs-stage-sub">완전 학습 도달 문항</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card">
-        <div class="card-header-row">
-          <h2 class="card-title"><span>🚨</span> 요주의 취약 문항 & 오답 노트</h2>
-          <span style="font-size: 0.8rem; color: var(--accent-rose); font-weight: 600;">집중 관리 대상</span>
-        </div>
-        <div id="wrong-questions-container">
-          <!-- 오답 목록 카드 동적 렌더링 -->
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================================
-         TAB 4: 일괄 업로드 & 데이터 관리 (Batch Pane)
-         ========================================================================= -->
-    <section class="tab-pane" id="tab-batch">
-      <div class="batch-tools-grid">
-        <div class="glass-card" style="border-color: rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.05);">
-          <div class="card-header-row">
-            <h2 class="card-title"><span>🚀</span> 2학기 개학 진도 860문항 원클릭 탑재</h2>
-            <span class="badge-count" style="background: var(--student-primary);">860문항 풀세트</span>
-          </div>
-          <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 1rem; line-height: 1.6;">
-            9월 3일 개학 후 10월 중순까지의 진도에 맞춰 생성된 <strong>나경이 480문항 + 차혜 380문항 (총 860문항)</strong>을 원클릭으로 즉시 탑재하고 Firebase Cloud Firestore에 일괄 동기화합니다. (기하/실험 SVG 다이어그램 포함)
-          </p>
-          <button type="button" class="btn btn-primary" id="btn-load-curriculum-860" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700;">
-            <span>⚡</span> 2학기 860문항 즉시 로드 & Firebase 클라우드 동기화
-          </button>
+          <span class="wrong-badge-count" id="wrong-total-badge">오답 0개</span>
         </div>
 
-        <div class="glass-card">
-          <h2 class="card-title" style="margin-bottom: 1rem;"><span>📂</span> JSON 파일 일괄 드래그 & 드롭</h2>
-          <div class="dropzone-box" id="json-dropzone">
-            <div class="dropzone-icon">📥</div>
-            <div style="font-weight: 700; margin-bottom: 6px;">all_curriculum_questions_860.json 또는 JSON 파일을 여기에 끌어다 놓으세요</div>
-            <div style="font-size: 0.82rem; color: var(--text-dim);">클릭하여 파일 선택 가능 (.json)</div>
-            <input type="file" id="json-file-input" accept=".json" style="display: none;">
-          </div>
-        </div>
-
-        <div class="glass-card">
-          <h2 class="card-title" style="margin-bottom: 1rem;"><span>💾</span> 데이터 백업 및 초기화</h2>
-          <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6;">
-            현재 등록된 모든 문항, 과제, SRS 복습 이력을 JSON 파일로 안전하게 백업하거나,
-            처음 제공된 표준 교과 샘플 학습지 데이터로 원클릭 복원할 수 있습니다.
-          </p>
-          <div style="display: flex; gap: 10px; flex-direction: column;">
-            <button type="button" class="btn btn-secondary" id="btn-export-data">
-              <span>📤</span> 현재 전체 데이터 JSON 내보내기 (백업)
-            </button>
-            <button type="button" class="btn btn-secondary" style="color: var(--accent-rose); border-color: rgba(244, 63, 94, 0.3);" id="btn-reset-data">
-              <span>⚠️</span> 초기 샘플 학습지 데이터로 전체 복원
-            </button>
-          </div>
+        <div class="wrong-list-scroll" id="wrong-list-container">
+          <!-- 동적 오답 카드 렌더링 -->
+          <div class="empty-state">오답 기록을 불러오는 중입니다...</div>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- =========================================================================
-       MODALS
-       ========================================================================= -->
-
-  <!-- 1. 스마트 텍스트 자동 파서 모달 -->
-  <div class="modal-overlay" id="modal-parser">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 style="font-size: 1.15rem; font-weight: 700;">📋 문제 텍스트 복사-붙여넣기 스마트 변환기</h3>
-        <button type="button" class="modal-close-btn">✕</button>
-      </div>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-        문제집이나 한글 파일에서 복사한 원문을 아래에 붙여넣으면 과목, 지문, 본문, 보기, 정답, 해설을 자동으로 분해하여 출제기에 채워줍니다.
-      </p>
-      <div class="form-group">
-        <textarea id="parser-input-text" class="form-control" rows="10" placeholder="[과목] 수학
-[학년] 중3
-[문제] 이차방정식 $x^2 - 5x + 6 = 0$ 의 두 근의 합은?
-① -6  ② -5  ③ 1  ④ 5  ⑤ 6
-[정답] 4
-[해설] 근과 계수의 관계에 의해 5입니다."></textarea>
-      </div>
-      <div style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button type="button" class="btn btn-primary" id="btn-apply-parser">
-          ⚡ 자동 파싱하여 출제기에 적용
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. Firebase 설정 모달 -->
-  <div class="modal-overlay" id="modal-settings">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 style="font-size: 1.15rem; font-weight: 700;">⚙️ Firebase 연동 설정 및 배포 안내</h3>
-        <button type="button" class="modal-close-btn">✕</button>
-      </div>
-      <div style="margin-bottom: 1.25rem;">
-        <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; padding: 12px; font-size: 0.85rem; line-height: 1.6; color: #cbd5e1;">
-          💡 <strong>GitHub Pages 호스팅 안내:</strong><br>
-          이 대시보드는 정적 웹으로 제작되어 깃허브 <strong>Settings &gt; Pages &gt; Branch: main / root</strong> 로 지정하시면 별도 서버 없이 무료로 즉시 전 세계 어디서나 접속 가능합니다!
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">현재 구동 모드</label>
-        <div style="font-size: 0.85rem; color: var(--accent-amber); font-weight: 600;">
-          현재 브라우저 로컬 인메모리 Mock Firestore 모드로 구동 중입니다. (키 없이도 100% 정상 작동)
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="fb-config-json">Firebase Web Config</label>
-        <textarea id="fb-config-json" class="form-control" rows="5" placeholder='{ "apiKey": "AIzaSy...", "authDomain": "haru-master.firebaseapp.com", "projectId": "haru-master", ... }'></textarea>
-        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
-          콘솔의 웹 앱(&lt;/&gt;)에서 복사한 firebaseConfig 객체를 그대로 붙여넣고 [설정 저장]을 누르세요.
-        </div>
-      </div>
-      <div style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button type="button" class="btn btn-primary" id="btn-save-fb-config">
-          💾 설정 저장
-        </button>
-        <button type="button" class="btn btn-secondary modal-close-btn">
-          닫기
-        </button>
-      </div>
-    </div>
-  <!-- 3. 수학 수식 간편 마법사 모달 -->
-  <div class="modal-overlay" id="modal-math-wizard">
-    <div class="modal-content" style="max-width: 520px;">
-      <div class="modal-header">
-        <h3 style="font-size: 1.15rem; font-weight: 700;">🧮 수학 수식 간편 마법사</h3>
-        <button type="button" class="modal-close-btn">✕</button>
-      </div>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-        LaTeX 기호를 몰라도 숫자만 입력하면 즉시 공식으로 만들어 원하는 입력칸에 넣어드립니다.
-      </p>
-
-      <!-- 1: 분수 -->
-      <div class="math-wizard-section">
-        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;">
-          <span>1. 분수 만들기</span> <span style="font-size: 0.8rem; color: var(--text-dim);">(예: $\frac{1}{2}$, $\frac{a}{b}$)</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="text" id="wiz-frac-num" class="form-control" style="width: 110px;" placeholder="분자 (예: 1)">
-          <span style="font-size: 1.2rem; font-weight: bold; color: var(--text-dim);">/</span>
-          <input type="text" id="wiz-frac-den" class="form-control" style="width: 110px;" placeholder="분모 (예: 2)">
-          <button type="button" class="btn btn-primary" style="font-size: 0.82rem; padding: 6px 14px;" id="wiz-btn-insert-frac">
-            분수 삽입
-          </button>
-        </div>
-      </div>
-
-      <!-- 2: 제곱근/루트 -->
-      <div class="math-wizard-section" style="margin-top: 1.25rem;">
-        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--accent-emerald); display: flex; align-items: center; gap: 6px;">
-          <span>2. 루트(제곱근) 만들기</span> <span style="font-size: 0.8rem; color: var(--text-dim);">(예: $\sqrt{18}$, $3\sqrt{2}$)</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="text" id="wiz-sqrt-coef" class="form-control" style="width: 80px;" placeholder="앞 계수">
-          <span style="font-size: 1.2rem; font-weight: bold; color: var(--text-dim);">&radic;</span>
-          <input type="text" id="wiz-sqrt-val" class="form-control" style="width: 130px;" placeholder="루트 안 (예: 18)">
-          <button type="button" class="btn btn-primary" style="font-size: 0.82rem; padding: 6px 14px;" id="wiz-btn-insert-sqrt">
-            루트 삽입
-          </button>
-        </div>
-      </div>
-
-      <!-- 3: 거듭제곱 -->
-      <div class="math-wizard-section" style="margin-top: 1.25rem;">
-        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; color: var(--accent-amber); display: flex; align-items: center; gap: 6px;">
-          <span>3. 거듭제곱 만들기</span> <span style="font-size: 0.8rem; color: var(--text-dim);">(예: $x^2$, $a^3$)</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <input type="text" id="wiz-pow-base" class="form-control" style="width: 110px;" placeholder="밑 (예: x)">
-          <span style="font-size: 1.1rem; font-weight: bold; color: var(--text-dim);">^</span>
-          <input type="text" id="wiz-pow-exp" class="form-control" style="width: 90px;" placeholder="지수 (예: 2)">
-          <button type="button" class="btn btn-primary" style="font-size: 0.82rem; padding: 6px 14px;" id="wiz-btn-insert-pow">
-            제곱 삽입
-          </button>
-        </div>
-      </div>
-
-      <div style="margin-top: 1.75rem; display: flex; justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary modal-close-btn">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification Container -->
-  <div id="toast-container"></div>
-
-  <!-- App Modular Logic -->
+  <!-- 메인 모니터링 컨트롤러 모듈 -->
   <script type="module" src="js/app.js"></script>
+
 </body>
 </html>

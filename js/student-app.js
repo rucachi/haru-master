@@ -329,10 +329,31 @@ class StudentApp {
 
   async init() {
     this.applyTheme();
+    this.checkDadCheer();
     this.initSubjectSelector();
     this.initSPenScratchpad();
     this.initEventListeners();
     await this.loadQuestions(false);
+  }
+
+  checkDadCheer() {
+    const raw = localStorage.getItem(`harumaster_cheer_${this.config.id}`);
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw);
+      if (data && data.message) {
+        const existing = document.querySelector(".dad-cheer-banner");
+        if (existing) existing.remove();
+
+        const cheerBanner = document.createElement("div");
+        cheerBanner.className = "dad-cheer-banner";
+        cheerBanner.innerHTML = `
+          <span>💌 <strong>아빠의 응원:</strong> "${data.message}"</span>
+          <button type="button" class="btn-close-cheer" onclick="this.parentElement.remove()">✕</button>
+        `;
+        document.querySelector(".student-header")?.insertAdjacentElement("afterend", cheerBanner);
+      }
+    } catch (e) {}
   }
 
   applyTheme() {
