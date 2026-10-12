@@ -616,7 +616,7 @@ class DadMonitoringApp {
       card.className = "wrong-item-card";
       card.innerHTML = `
         <div class="wrong-item-meta">
-          <span class="wrong-subject-tag ${item.tagClass}">${item.subject} · ${item.chapter}</span>
+          <span class="wrong-subject-tag ${item.tagClass}">${item.subject} · ${item.chapter || "복습 문항"}</span>
           <span class="wrong-time-tag">${item.time}</span>
         </div>
         <div class="wrong-q-text">${this.renderMath(item.question_text)}</div>
