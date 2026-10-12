@@ -6,7 +6,7 @@
  * - 실시간 에빙하우스 SRS 망각곡선 & 오답노트
  */
 
-import { dbService } from './firebase-service.js';
+import { dbService } from './firebase-service.js?v=b78512f';
 
 class DadMonitoringApp {
   constructor() {
