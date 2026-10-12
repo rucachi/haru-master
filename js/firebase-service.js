@@ -434,7 +434,11 @@ export class HaruMasterDB {
 
     const nextDateObj = new Date(baseDate);
     nextDateObj.setDate(nextDateObj.getDate() + nextInterval);
-    const nextDateStr = nextDateObj.toISOString().slice(0, 10).replace(/-/g, "");
+    const nextDateStr = [
+      nextDateObj.getFullYear(),
+      String(nextDateObj.getMonth() + 1).padStart(2, "0"),
+      String(nextDateObj.getDate()).padStart(2, "0")
+    ].join("");
 
     const updatePayload = {
       question_id: questionId,

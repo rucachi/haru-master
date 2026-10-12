@@ -495,7 +495,7 @@ class StudentApp {
     const targetSubjects = (subFilter === "ALL") ? Object.keys(quotaMap) : [subFilter];
 
     // 날짜 기반 시드 생성 (오늘 하루 동안은 새로고침해도 동일 세트 유지, 내일이 되면 자동으로 새로운 문제로 갱신)
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = this.getDateKey();
     const baseSeed = isMoreStudy ? Date.now() : this.hashSeed(`${todayStr}_${this.config.id}`);
 
     let finalQuestions = [];
@@ -640,6 +640,13 @@ class StudentApp {
       hash |= 0;
     }
     return Math.abs(hash);
+  }
+
+  getDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
   /**
@@ -1027,7 +1034,7 @@ class StudentApp {
   }
 
   saveProgressLocally() {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = this.getDateKey();
     const progressKey = `harumaster_prog_${this.config.id}_${todayStr}_${this.selectedSubject}`;
     localStorage.setItem(progressKey, JSON.stringify({
       currentIndex: this.currentIndex,
@@ -1102,7 +1109,7 @@ class StudentApp {
     `;
 
     // 완수 시 진행률 키 정리
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = this.getDateKey();
     localStorage.removeItem(`harumaster_prog_${this.config.id}_${todayStr}_${this.selectedSubject}`);
 
     if (compEl && gridEl) {
@@ -1417,7 +1424,7 @@ class StudentApp {
         }
 
         // 오늘 진행 상태 초기화
-        const todayStr = new Date().toISOString().slice(0, 10);
+        const todayStr = this.getDateKey();
         localStorage.removeItem(`harumaster_prog_${this.config.id}_${todayStr}_${this.selectedSubject}`);
 
         // isMoreStudy = true 로 신규 랜덤 문제 세트 로드
