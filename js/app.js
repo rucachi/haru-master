@@ -1166,6 +1166,32 @@ function initSettingsModal() {
     }
   });
 
+  const fbConfigInput = document.getElementById("fb-config-json");
+  if (fbConfigInput) {
+    const saved = localStorage.getItem("harumaster_firebase_config");
+    if (saved) fbConfigInput.value = saved;
+  }
+
+  document.getElementById("btn-save-fb-config")?.addEventListener("click", () => {
+    const val = fbConfigInput?.value?.trim();
+    if (val) {
+      try {
+        let jsonStr = val;
+        if (jsonStr.includes("firebaseConfig =")) {
+          jsonStr = jsonStr.substring(jsonStr.indexOf("{"), jsonStr.lastIndexOf("}") + 1);
+        }
+        localStorage.setItem("harumaster_firebase_config", jsonStr);
+        showToast("Firebase Web Config가 안전하게 저장되었습니다! ✨", "success");
+        document.getElementById("modal-settings")?.classList.remove("open");
+      } catch (e) {
+        showToast("설정 형식을 확인해 주세요.", "error");
+      }
+    } else {
+      localStorage.removeItem("harumaster_firebase_config");
+      showToast("Firebase 설정이 초기화되었습니다.", "info");
+    }
+  });
+
   document.getElementById("btn-export-data")?.addEventListener("click", () => {
     const jsonStr = dbService.exportJSON();
     const blob = new Blob([jsonStr], { type: "application/json" });

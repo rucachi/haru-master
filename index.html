@@ -533,10 +533,16 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="fb-config-json">Firebase Web Config (선택사항)</label>
-        <textarea id="fb-config-json" class="form-control" rows="5" placeholder='{ "apiKey": "...", "projectId": "...", ... }'></textarea>
+        <label class="form-label" for="fb-config-json">Firebase Web Config</label>
+        <textarea id="fb-config-json" class="form-control" rows="5" placeholder='{ "apiKey": "AIzaSy...", "authDomain": "haru-master.firebaseapp.com", "projectId": "haru-master", ... }'></textarea>
+        <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 4px;">
+          콘솔의 웹 앱(&lt;/&gt;)에서 복사한 firebaseConfig 객체를 그대로 붙여넣고 [설정 저장]을 누르세요.
+        </div>
       </div>
-      <div style="display: flex; justify-content: flex-end;">
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button type="button" class="btn btn-primary" id="btn-save-fb-config">
+          💾 설정 저장
+        </button>
         <button type="button" class="btn btn-secondary modal-close-btn">
           닫기
         </button>
