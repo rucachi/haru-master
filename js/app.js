@@ -526,8 +526,12 @@ class DadMonitoringApp {
    * 3. 🤖 AI 튜터 안티그래비티의 정밀 진단 리포트 & 아빠 코칭 가이드
    */
   renderAIInsightReport() {
-    const isNakyung = (this.student === "nakyung");
-    const sName = isNakyung ? "나경이" : "차혜";
+    const sName = this.dashboardData?.studentName || (this.student === "nakyung" ? "나경이" : "차혜");
+    const subjectStats = (this.dashboardData?.subjects || [])
+      .filter(subject => subject.correct + subject.wrong > 0)
+      .sort((a, b) => b.rate - a.rate);
+    const strongest = subjectStats[0];
+    const weakest = subjectStats[subjectStats.length - 1];
 
     document.getElementById("ai-student-name").innerText = sName;
 
@@ -535,41 +539,16 @@ class DadMonitoringApp {
     const weaknessEl = document.getElementById("ai-weakness-text");
     const coachingEl = document.getElementById("ai-coaching-text");
 
-    if (isNakyung) {
-      // 나경이 진단
-      strengthEl.innerHTML = `
-        • <strong>국어(비판적 읽기 100%)</strong>와 <strong>영어(장문 독해 100%)</strong>: 인공지능 윤리 논설문 및 제시카의 일화 등 긴 지문의 핵심 논지를 정확하게 파악하고 있습니다.<br>
-        • <strong>수학(삼각비 93%)</strong>: 특수각 $30^\\circ, 45^\\circ, 60^\\circ$ 의 기본 삼각비 계산 속도가 매우 안정적입니다.
-      `;
-
-      weaknessEl.innerHTML = `
-        • <strong>과학 6단원 [에너지 전환과 보존] (오답률 27%)</strong>: 역학적 에너지 보존($9.8mh = \\frac{1}{2}mv^2$)에서 최고점 위치 에너지가 지면 직전 운동 에너지로 전환되는 수치 계산 시 단위 변환 실수 발생.<br>
-        • <strong>역사 V단원 [일제 강점기] (오답률 17%)</strong>: 1910년대 토지조사사업과 1920년대 산미증식계획의 세부 특징 혼동 주의.
-      `;
-
-      coachingEl.innerHTML = `
-        💬 <strong>오늘의 칭찬 & 가이드:</strong><br>
-        "나경이가 과학 계산 문제를 풀 때 식을 암산하기보다 <strong>우측 S펜 연습장에 풀이 단계를 딱 한 줄만 적도록</strong> 격려해 주세요.<br>
-        <em>'나경아, 공식은 완벽히 알고 있으니 S펜에 식 하나만 적고 계산하면 100점 맞겠어!'</em>라고 말씀해 주시면 계산 실수가 즉시 보완됩니다."
-      `;
-    } else {
-      // 차혜 진단
-      strengthEl.innerHTML = `
-        • <strong>사회(문화의 이해 100%)</strong>와 <strong>국어(문장 성분 92%)</strong>: 문화 상대주의의 가치 판단 및 '맛있는(관형어)', '빠르게(부사어)' 등 문장 성분 판별력이 매우 탁월합니다.<br>
-        • <strong>과학(물질의 상태 변화 87%)</strong>: 융해, 기화, 승화의 상태 변화 개념을 일상 속 사례와 잘 연결하고 있습니다.
-      `;
-
-      weaknessEl.innerHTML = `
-        • <strong>수학 2단원 [평면도형 - 원과 부채꼴] (오답률 23%)</strong>: 반지름 $r$, 중심각 $x^\\circ$ 일 때 부채꼴 호의 길이($2\\pi r \\times \\frac{x}{360}$)에서 $\\frac{x}{360}$ 분수 약분 과정 중 오답 발생.<br>
-        • <strong>과학 6단원 [빛과 파동]</strong>: 평면거울 반사의 법칙에서 법선과 이루는 입사각 기준 숙지 필요.
-      `;
-
-      coachingEl.innerHTML = `
-        💬 <strong>오늘의 칭찬 & 가이드:</strong><br>
-        "차혜에게 공식을 기계적으로 외우게 하기보다, <strong>'피자 한 판($360^\\circ$)에서 몇 조각을 자른 것인지'</strong> 시각적 비유를 들어 가볍게 짚어주세요.<br>
-        <em>'차혜야, 사회랑 국어 문장 성분 맞춘 거 정말 대단해! 수학 부채꼴은 피자 조각 생각하며 한 번만 더 보자'</em>라고 응원해 주시면 큰 자신감을 얻게 됩니다."
-      `;
+    if (!strongest || !weakest) {
+      strengthEl.innerText = "• 아직 기간 내 풀이 데이터가 없습니다.";
+      weaknessEl.innerText = "• 문제를 풀면 과목별 취약점이 자동으로 분석됩니다.";
+      coachingEl.innerHTML = "💬 <strong>오늘의 칭찬 & 가이드:</strong><br>첫 문제를 풀고 나면 맞춤 코칭이 표시됩니다.";
+      return;
     }
+
+    strengthEl.innerHTML = `• <strong>${strongest.name}(${strongest.rate}%)</strong>: 현재 기간에 가장 안정적인 과목입니다.<br>• 풀이 ${strongest.correct + strongest.wrong}문항 중 ${strongest.correct}문항을 맞혔습니다.`;
+    weaknessEl.innerHTML = `• <strong>${weakest.name}(${weakest.rate}%)</strong>: 현재 기간 정답률이 가장 낮은 과목입니다.<br>• 오답 ${weakest.wrong}문항을 풀이 과정과 함께 다시 확인해 보세요.`;
+    coachingEl.innerHTML = `💬 <strong>오늘의 칭찬 & 가이드:</strong><br>"${sName}아, ${strongest.name}은(는) 잘하고 있어! ${weakest.name} 문제는 S펜으로 풀이 단계를 한 줄씩 적어 보자."`;
   }
 
   /**
