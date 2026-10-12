@@ -1,8 +1,29 @@
-/**
- * 하루마스터 (HaruMaster) - Firebase Firestore & Mock Database Service
- * Firebase 인증키가 있으면 실시간 Cloud Firestore에 연동되고,
- * 키가 없거나 테스트 중일 때는 내장된 고성능 인메모리 Mock Firestore 모드로 자동 동작합니다.
- */
+import { FIREBASE_CONFIG } from './firebase-config.js';
+
+let fbApp = null;
+let firestoreDb = null;
+let fbDoc, fbSetDoc, fbGetDoc, fbGetDocs, fbCollection, fbDeleteDoc;
+
+async function initCloudFirestore() {
+  if (firestoreDb) return firestoreDb;
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const firestoreModule = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    fbDoc = firestoreModule.doc;
+    fbSetDoc = firestoreModule.setDoc;
+    fbGetDoc = firestoreModule.getDoc;
+    fbGetDocs = firestoreModule.getDocs;
+    fbCollection = firestoreModule.collection;
+    fbDeleteDoc = firestoreModule.deleteDoc;
+
+    fbApp = initializeApp(FIREBASE_CONFIG);
+    firestoreDb = firestoreModule.getFirestore(fbApp);
+    return firestoreDb;
+  } catch (err) {
+    console.warn("Firebase CDN 로딩 실패 (로컬 모드로 실행):", err);
+    return null;
+  }
+}
 
 // 초기 시드 데이터 (중1/중3 교과 샘플 학습지)
 const INITIAL_SEED_DATA = {
@@ -147,6 +168,77 @@ export class HaruMasterDB {
     this.isLiveFirebase = false;
     this.db = null;
     this.loadLocalData();
+    this.initFirebase();
+  }
+
+  async initFirebase() {
+    this.db = await initCloudFirestore();
+    if (this.db) {
+      this.isLiveFirebase = true;
+      this.updateStatusPill(true);
+      await this.syncWithRemoteFirestore();
+    } else {
+      this.isLiveFirebase = false;
+      this.updateStatusPill(false);
+    }
+  }
+
+  updateStatusPill(isLive) {
+    const pill = document.getElementById("db-status-pill");
+    const text = document.getElementById("db-status-text");
+    if (!pill || !text) return;
+    if (isLive) {
+      pill.classList.remove("mock");
+      pill.title = "Firebase Cloud Firestore에 실시간 연결됨 (haru-master)";
+      text.innerText = "🔥 Cloud Firestore 연결됨";
+    } else {
+      pill.classList.add("mock");
+      pill.title = "로컬 Mock Firestore 모드";
+      text.innerText = "인메모리 Mock DB";
+    }
+  }
+
+  async syncWithRemoteFirestore() {
+    if (!this.db || !fbGetDocs || !fbCollection) return;
+    try {
+      // 1. 원격에서 기존 문항 읽어오기
+      const qSnap = await fbGetDocs(fbCollection(this.db, "Questions"));
+      let remoteQCount = 0;
+      qSnap.forEach(docSnap => {
+        this.data.questions[docSnap.id] = docSnap.data();
+        remoteQCount++;
+      });
+
+      // 2. 원격에서 기존 과제 읽어오기
+      const aSnap = await fbGetDocs(fbCollection(this.db, "Assignments"));
+      aSnap.forEach(docSnap => {
+        this.data.assignments[docSnap.id] = docSnap.data();
+      });
+
+      if (remoteQCount === 0) {
+        // 원격 DB가 방금 생성되어 비어있으면 로컬 초기 시드 데이터를 원격 DB로 업로드(시딩)!
+        await this.seedRemoteFirestore();
+      } else {
+        this.saveLocalData();
+      }
+    } catch (e) {
+      console.warn("원격 Firestore 동기화 오류 (로컬 데이터 유지):", e);
+    }
+  }
+
+  async seedRemoteFirestore() {
+    if (!this.db || !fbSetDoc || !fbDoc) return;
+    try {
+      for (const [qid, q] of Object.entries(this.data.questions)) {
+        await fbSetDoc(fbDoc(this.db, "Questions", qid), q, { merge: true });
+      }
+      for (const [aid, a] of Object.entries(this.data.assignments)) {
+        await fbSetDoc(fbDoc(this.db, "Assignments", aid), a, { merge: true });
+      }
+      console.log("🔥 [Cloud Firestore] 초기 교과 문제 및 일일 과제 클라우드 시딩 완료!");
+    } catch (e) {
+      console.warn("원격 시딩 오류:", e);
+    }
   }
 
   loadLocalData() {
@@ -185,9 +277,21 @@ export class HaruMasterDB {
     if (!q.question_id) {
       q.question_id = `Q_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     }
-    this.data.questions[q.question_id] = { ...q, updated_at: new Date().toISOString() };
+    const cleanQ = { ...q, updated_at: new Date().toISOString() };
+    this.data.questions[q.question_id] = cleanQ;
     this.saveLocalData();
-    return this.data.questions[q.question_id];
+
+    // Cloud Firestore 실시간 저장
+    if (this.db && fbSetDoc && fbDoc) {
+      try {
+        await fbSetDoc(fbDoc(this.db, "Questions", q.question_id), cleanQ, { merge: true });
+        console.log(`[Firestore] 문항 클라우드 저장 완료: ${q.question_id}`);
+      } catch (err) {
+        console.warn("[Firestore] 원격 저장 실패 (로컬 보존됨):", err);
+      }
+    }
+
+    return cleanQ;
   }
 
   async deleteQuestion(id) {
@@ -198,6 +302,12 @@ export class HaruMasterDB {
       a.total_questions = a.question_ids.length;
     });
     this.saveLocalData();
+
+    if (this.db && fbDeleteDoc && fbDoc) {
+      try {
+        await fbDeleteDoc(fbDoc(this.db, "Questions", id));
+      } catch (e) {}
+    }
   }
 
   // --- 과제 CRUD ---
@@ -214,7 +324,7 @@ export class HaruMasterDB {
 
   async saveAssignment(date, grade, questionIds) {
     const id = `${date}_G${grade}`;
-    this.data.assignments[id] = {
+    const assignDoc = {
       assignment_id: id,
       assignment_date: date,
       target_grade: Number(grade),
@@ -222,8 +332,20 @@ export class HaruMasterDB {
       total_questions: questionIds.length,
       created_at: new Date().toISOString()
     };
+    this.data.assignments[id] = assignDoc;
     this.saveLocalData();
-    return this.data.assignments[id];
+
+    // Cloud Firestore 실시간 저장
+    if (this.db && fbSetDoc && fbDoc) {
+      try {
+        await fbSetDoc(fbDoc(this.db, "Assignments", id), assignDoc, { merge: true });
+        console.log(`[Firestore] 과제 클라우드 저장 완료: ${id}`);
+      } catch (err) {
+        console.warn("[Firestore] 원격 저장 실패 (로컬 보존됨):", err);
+      }
+    }
+
+    return assignDoc;
   }
 
   // --- SRS 복습 & 학생 통계 ---
@@ -283,6 +405,16 @@ export class HaruMasterDB {
 
     this.data.reviews[studentId][questionId] = updatePayload;
     this.saveLocalData();
+
+    // Cloud Firestore 실시간 저장
+    if (this.db && fbSetDoc && fbDoc) {
+      try {
+        await fbSetDoc(fbDoc(this.db, "Users", studentId, "Reviews", questionId), updatePayload, { merge: true });
+        console.log(`[Firestore] SRS 복습 기록 클라우드 저장 완료: ${questionId}`);
+      } catch (err) {
+        console.warn("[Firestore] 원격 SRS 저장 실패:", err);
+      }
+    }
 
     return {
       isCorrect,
