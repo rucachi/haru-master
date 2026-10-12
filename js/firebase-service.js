@@ -438,6 +438,7 @@ export class HaruMasterDB {
 
     const updatePayload = {
       question_id: questionId,
+      selected_answer: Number(selectedAnswer),
       interval: nextInterval,
       wrongCount: nextWrongCount,
       last_is_correct: isCorrect,

@@ -599,10 +599,11 @@ class DadMonitoringApp {
       .slice(0, 10)
       .map(review => ({
         subject: review.question.subject || "공통",
+        chapter: review.question.chapter || review.question.unit || "복습 문항",
         tagClass: `tag-${(review.question.subject || "common").toLowerCase()}`,
         time: review.last_solved_at ? new Date(review.last_solved_at).toLocaleString("ko-KR") : "기록 시간 없음",
         question_text: review.question.question_text,
-        chosen: "선택 답안 기록 없음",
+        chosen: review.selected_answer ? `${review.selected_answer}번` : "선택 답안 기록 없음",
         correct: `${review.question.correct_answer}번`,
         explanation: review.question.explanation || "해설이 제공되지 않았습니다."
       }));
