@@ -566,15 +566,43 @@ class StudentApp {
     this.shuffleArrayWithSeed(finalQuestions, baseSeed + 999);
 
     this.questions = finalQuestions;
-    this.currentIndex = 0;
-    this.solvedCount = 0;
-    this.correctCount = 0;
     this.isGraded = false;
+
+    // 오늘 학습 진행 상태(몇 번째 문제까지 풀었는지) 안전 복원
+    const progressKey = `harumaster_prog_${this.config.id}_${todayStr}_${subFilter}`;
+    let restored = false;
+
+    if (!isMoreStudy) {
+      try {
+        const saved = JSON.parse(localStorage.getItem(progressKey));
+        if (saved && typeof saved.currentIndex === 'number' && saved.currentIndex < this.questions.length) {
+          this.currentIndex = saved.currentIndex;
+          this.solvedCount = saved.solvedCount || 0;
+          this.correctCount = saved.correctCount || 0;
+          restored = (this.currentIndex > 0);
+        } else {
+          this.currentIndex = 0;
+          this.solvedCount = 0;
+          this.correctCount = 0;
+        }
+      } catch (e) {
+        this.currentIndex = 0;
+        this.solvedCount = 0;
+        this.correctCount = 0;
+      }
+    } else {
+      localStorage.removeItem(progressKey);
+      this.currentIndex = 0;
+      this.solvedCount = 0;
+      this.correctCount = 0;
+    }
 
     this.renderCurrentQuestion();
     this.updateProgress();
 
-    if (isMoreStudy) {
+    if (restored) {
+      this.showToast(`✨ ${this.currentIndex + 1}번 문제부터 이어서 풀이를 시작합니다!`, "info");
+    } else if (isMoreStudy) {
       this.showToast(`🔥 ${this.questions.length}문제가 새롭게 생성되었습니다! (틀린 문제 복습 포함 ✨)`, "success");
     }
   }
@@ -865,8 +893,19 @@ class StudentApp {
     if (this.clearCanvas) {
       this.clearCanvas(); // 새 문제로 넘어갈 때 S펜 연습장 자동 정리
     }
+    this.saveProgressLocally();
     this.renderCurrentQuestion();
     this.updateProgress();
+  }
+
+  saveProgressLocally() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const progressKey = `harumaster_prog_${this.config.id}_${todayStr}_${this.selectedSubject}`;
+    localStorage.setItem(progressKey, JSON.stringify({
+      currentIndex: this.currentIndex,
+      solvedCount: this.solvedCount,
+      correctCount: this.correctCount
+    }));
   }
 
   updateProgress() {
@@ -927,12 +966,16 @@ class StudentApp {
           <button type="button" class="btn-more-study" id="btn-study-more">
             <span>🔥</span> ${totalQ}문제 더 공부하기 (새로운 문제 + 오답 복습)
           </button>
-          <button type="button" class="btn-student-next" style="background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-glass);" onclick="window.location.reload()">
+          <button type="button" class="btn-student-next" style="background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-glass);" id="btn-restart-fresh">
             🔄 처음부터 다시 풀기
           </button>
         </div>
       </div>
     `;
+
+    // 완수 시 진행률 키 정리
+    const todayStr = new Date().toISOString().slice(0, 10);
+    localStorage.removeItem(`harumaster_prog_${this.config.id}_${todayStr}_${this.selectedSubject}`);
 
     if (compEl && gridEl) {
       gridEl.style.display = "none";
@@ -942,6 +985,12 @@ class StudentApp {
       const main = document.getElementById("student-main-content");
       if (main) main.innerHTML = compHtml;
     }
+
+    // 처음부터 다시 풀기 버튼 바인딩
+    document.getElementById("btn-restart-fresh")?.addEventListener("click", () => {
+      localStorage.removeItem(`harumaster_prog_${this.config.id}_${todayStr}_${this.selectedSubject}`);
+      window.location.reload();
+    });
 
     // 더 공부하기 버튼 이벤트 바인딩
     document.getElementById("btn-study-more")?.addEventListener("click", () => {
