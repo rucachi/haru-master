@@ -546,6 +546,75 @@ body.theme-chahye .opt-card-btn.selected {
   50% { transform: translateY(-16px); }
 }
 
+/* --- 과목 선택 바 (Subject Selector Bar) --- */
+.student-subject-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1.5rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-bottom: 1px solid var(--border-glass);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+}
+
+.student-subject-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.sub-tab-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 7px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sub-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.sub-tab-btn.active {
+  background: var(--student-primary);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px var(--student-primary-glow);
+}
+
+/* 추가 공부하기 버튼 스타일 */
+.btn-more-study {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 1.1rem 2.2rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.35);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-more-study:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 30px rgba(245, 158, 11, 0.45);
+}
+
 @keyframes scaleUp {
   from { transform: scale(0.9); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
@@ -555,3 +624,4 @@ body.theme-chahye .opt-card-btn.selected {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+

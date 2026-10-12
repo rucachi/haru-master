@@ -1,27 +1,338 @@
 /**
  * 하루마스터 (HaruMaster) - 자녀 전용 태블릿 학습 컨트롤러
- * 첫째 나경이(중3) / 둘째 차혜(중1) 맞춤형 일일 과제 풀이 및 S-Pen 연습장 엔진
+ * 첫째 나경이(중3) / 둘째 차혜(중1) 과목 선택, 1일 20문제 학습 및 "더 공부하기(오답 포함)" 엔진
  */
 
 import { dbService } from './firebase-service.js';
 
+// 기본 1일 학습 문항 수
+const DAILY_TARGET = 20;
+
+// 중학교 학년별/과목별 교육과정 기반 풍부한 문제 생성 뱅크 (20문제 풀 세트 보장)
+const CURRICULUM_BANKS = {
+  // === 중3 (나경이) ===
+  3: {
+    "수학": [
+      {
+        question_text: "이차방정식 $x^2 - 6x + 8 = 0$ 의 두 근의 합을 구하시오.",
+        options: ["$2$", "$4$", "$6$", "$8$", "$10$"],
+        correct_answer: 3,
+        explanation: "근과 계수의 관계에 의해 두 근의 합은 $-(-6)/1 = 6$ 입니다."
+      },
+      {
+        question_text: "다음 직각삼각형에서 밑변의 길이가 $6$, 높이가 $8$일 때 빗변의 길이는?",
+        options: ["$9$", "$10$", "$11$", "$12$", "$14$"],
+        correct_answer: 2,
+        explanation: "피타고라스 정리에 의해 $6^2 + 8^2 = 36 + 64 = 100 = 10^2$ 이므로 빗변은 $10$입니다."
+      },
+      {
+        question_text: "이차함수 $y = 2(x - 3)^2 + 5$ 의 꼭짓점의 좌표는?",
+        options: ["$(-3, 5)$", "$(3, 5)$", "$(3, -5)$", "$(-3, -5)$", "$(2, 5)$"],
+        correct_answer: 2,
+        explanation: "$y = a(x - p)^2 + q$ 의 꼭짓점은 $(p, q)$이므로 $(3, 5)$입니다."
+      },
+      {
+        question_text: "$\\sqrt{75} - \\sqrt{27}$ 을 간단히 한 결과는?",
+        options: ["$\\sqrt{3}$", "$2\\sqrt{3}$", "$3\\sqrt{3}$", "$4\\sqrt{3}$", "$8\\sqrt{3}$"],
+        correct_answer: 2,
+        explanation: "$\\sqrt{75} = 5\\sqrt{3}$, $\\sqrt{27} = 3\\sqrt{3}$ 이므로 $5\\sqrt{3} - 3\\sqrt{3} = 2\\sqrt{3}$ 입니다."
+      },
+      {
+        question_text: "직각삼각형에서 $\\angle B = 90^\\circ$이고 $\\angle A = 30^\\circ$, 빗변 $AC = 12$일 때 밑변 $BC$의 길이는? (단, $\\sin 30^\\circ = \\frac{1}{2}$)",
+        options: ["$3$", "$4$", "$6$", "$6\\sqrt{3}$", "$8$"],
+        correct_answer: 3,
+        explanation: "$\\sin 30^\\circ = \\frac{BC}{AC} = \\frac{BC}{12} = \\frac{1}{2}$ 이므로 $BC = 6$ 입니다."
+      },
+      {
+        question_text: "다음 식 $(2x + 3)(3x - 1)$ 을 전개했을 때 $x$의 계수는?",
+        options: ["$5$", "$7$", "$9$", "$11$", "$13$"],
+        correct_answer: 2,
+        explanation: "$(2x)(3x) + (2x)(-1) + (3)(3x) + (3)(-1) = 6x^2 + 7x - 3$ 이므로 $x$의 계수는 $7$입니다."
+      },
+      {
+        question_text: "이차방정식 $x^2 - 4 = 0$ 의 두 근의 곱은?",
+        options: ["$-4$", "$-2$", "$0$", "$2$", "$4$"],
+        correct_answer: 1,
+        explanation: "$x^2 = 4$ 이므로 $x = \\pm 2$ 입니다. 두 근의 곱은 $2 \\times (-2) = -4$ 입니다."
+      }
+    ],
+    "과학": [
+      {
+        question_text: "멘델의 유전 원리 중 서로 다른 대립 유전자 쌍이 서로 영향을 주지 않고 독립적으로 유전되는 법칙은?",
+        options: ["우열의 원리", "분리의 법칙", "독립의 법칙", "연관의 법칙", "상보성의 원리"],
+        correct_answer: 3,
+        explanation: "두 쌍 이상의 대립 형질이 유전될 때 각각 독립적으로 분리되어 유전되는 현상은 독립의 법칙입니다."
+      },
+      {
+        question_text: "물체가 자유 낙하할 때 공기 저항을 무시하면 역학적 에너지는 어떻게 되는가?",
+        options: ["감소한다", "일정하게 보존된다", "증가한다", "0이 된다", "주기적으로 진동한다"],
+        correct_answer: 2,
+        explanation: "외력이 작용하지 않을 때 위치 에너지와 운동 에너지의 합인 역학적 에너지는 일정하게 보존됩니다."
+      },
+      {
+        question_text: "다음 중 화학 변화(화학 반응)에 해당하는 현상으로 가장 알맞은 것은?",
+        options: ["얼음이 녹아 물이 된다", "철이 녹슬어 붉어진다", "설탕이 물에 녹는다", "유리창이 깨진다", "향수 냄새가 퍼진다"],
+        correct_answer: 2,
+        explanation: "철이 산소와 반응하여 산화철로 성질이 바뀌는 것은 새로운 물질이 생성되는 화학 변화입니다."
+      },
+      {
+        question_text: "지표면 부근의 공기가 가열되어 상승할 때 부피 팽창과 기온 하강으로 구름이 생기는 과정은?",
+        options: ["단열 압축", "단열 팽창", "등온 팽창", "복사 냉각", "승화 작용"],
+        correct_answer: 2,
+        explanation: "상승하는 공기 덩어리는 주변 기압이 낮아져 팽창하면서 내부 에너지를 소모해 온도가 떨어지는 단열 팽창을 겪습니다."
+      },
+      {
+        question_text: "별의 표면 온도가 가장 높은 색깔은?",
+        options: ["붉은색", "주황색", "노란색", "흰색", "파란색"],
+        correct_answer: 5,
+        explanation: "별의 표면 온도가 높을수록 파란색(청색)을 띠고, 낮을수록 붉은색을 띱니다."
+      }
+    ],
+    "국어": [
+      {
+        question_text: "다음 중 비유적 표현 중 'A는 B이다' 형태로 원관념과 보조관념을 직접 연결하는 표현법은?",
+        options: ["직유법", "은유법", "의인법", "대유법", "과장법"],
+        correct_answer: 2,
+        explanation: "'내 마음은 호수요'와 같이 암시적으로 빗대는 방법은 은유법(Metaphor)입니다."
+      },
+      {
+        question_text: "다음 단어 중 자음동화 현상(비음화)이 일어나는 예시로 알맞은 것은?",
+        options: ["국물 [궁물]", "굳이 [구지]", "좋고 [조코]", "놓다 [노타]", "맨입 [맨닙]"],
+        correct_answer: 1,
+        explanation: "'국물'에서 받침 'ㄱ'이 비음 'ㅁ'을 만나 비음 'ㅇ'으로 동화되는 것은 비음화(자음동화)입니다."
+      },
+      {
+        question_text: "토론에서 찬성 측과 반대 측이 상대방의 논리적 허점을 지적하고 질문하는 단계는?",
+        options: ["입론", "반론(교차조사)", "최종 발언", "숙의 시간", "기조연설"],
+        correct_answer: 2,
+        explanation: "상대방의 주장을 반박하고 증거를 검증하는 과정은 반론 및 교차조사입니다."
+      }
+    ],
+    "영어": [
+      {
+        question_text: "다음 빈칸에 알맞은 관계대명사는? 'The student _____ won the science contest is my sister.'",
+        options: ["which", "who", "whom", "whose", "where"],
+        correct_answer: 2,
+        explanation: "선행사가 사람(The student)이고 주어 역할을 하므로 주격 관계대명사 who가 알맞습니다."
+      },
+      {
+        question_text: "다음 문장의 수동태 변환으로 올바른 것은? 'He wrote this novel.'",
+        options: [
+          "This novel writes him.",
+          "This novel was written by him.",
+          "This novel has written by him.",
+          "This novel is writing him.",
+          "This novel will be wrote by him."
+        ],
+        correct_answer: 2,
+        explanation: "과거 시제 수동태는 'be동사 과거형(was) + 과거분사(written) + by 행위자' 입니다."
+      },
+      {
+        question_text: "Choose the correct meaning of the idiom: 'piece of cake'",
+        options: ["Very delicious food", "Something very easy", "A difficult challenge", "A special birthday gift", "A dangerous situation"],
+        correct_answer: 2,
+        explanation: "'piece of cake'는 '식은 죽 먹기, 매우 쉬운 일'을 뜻하는 관용구입니다."
+      }
+    ],
+    "사회": [
+      {
+        question_text: "시장 경제에서 수요와 공급이 일치하여 가격이 결정되는 지점의 가격은?",
+        options: ["최고 가격", "최저 가격", "균형 가격", "독점 가격", "공공 요금"],
+        correct_answer: 3,
+        explanation: "수요 곡선과 공급 곡선이 만나는 지점에서 결정되는 가격을 균형 가격(Equilibrium Price)이라고 합니다."
+      },
+      {
+        question_text: "국가 권력의 남용을 막고 국민의 기본권을 보장하기 위해 국가 권력을 분립하는 원리는?",
+        options: ["국민주권주의", "권력분립의 원리", "법치주의", "복지국가의 원리", "평화통일의 원리"],
+        correct_answer: 2,
+        explanation: "입법, 사법, 행정으로 국가 권력을 나누어 상호 견제와 균형을 이루는 원리는 권력분립입니다."
+      }
+    ],
+    "역사": [
+      {
+        question_text: "1919년 3월 1일 만세 운동 이후 수립되어 독립운동을 통할한 민주공화제 정부는?",
+        options: ["대한제국", "대한민국 임시정부", "조선건국준비위원회", "신민회", "의열단"],
+        correct_answer: 2,
+        explanation: "3·1 운동의 결실로 상하이에 수립된 대한민국 임시정부는 최초의 삼권분립 민주공화정부였습니다."
+      },
+      {
+        question_text: "1894년 반봉건·반외세를 기치로 전봉준 등을 중심으로 일어난 민중 운동은?",
+        options: ["동학농민운동", "임오군란", "갑신정변", "만민공동회", "국채보상운동"],
+        correct_answer: 1,
+        explanation: "1894년 고부 군수 조병갑의 탐학에 맞서 시작된 거족적 농민 봉기는 동학농민운동입니다."
+      }
+    ]
+  },
+
+  // === 중1 (차혜) ===
+  1: {
+    "수학": [
+      {
+        question_text: "자연수 $60$을 소인수분해한 결과로 알맞은 것은?",
+        options: ["$2 \\times 3 \\times 10$", "$2^2 \\times 3 \\times 5$", "$2 \\times 3^2 \\times 5$", "$4 \\times 15$", "$2^3 \\times 3 \\times 5$"],
+        correct_answer: 2,
+        explanation: "$60 = 4 \\times 15 = 2^2 \\times 3 \\times 5$ 로 소수들만의 곱으로 나타냅니다."
+      },
+      {
+        question_text: "다음 계산 결과가 가장 큰 것은?",
+        options: ["$(-3) + (+5)$", "$(-4) - (-6)$", "$(-2) \\times (-3)$", "$(-10) \\div (+2)$", "$0 + (-5)$"],
+        correct_answer: 3,
+        explanation: "$(-2) \\times (-3) = +6$ 으로 가장 큽니다."
+      },
+      {
+        question_text: "일차방정식 $3x - 5 = 10$ 의 해 $x$의 값을 구하시오.",
+        options: ["$3$", "$4$", "$5$", "$6$", "$7$"],
+        correct_answer: 3,
+        explanation: "$3x = 10 + 5 = 15$ 이므로 $x = 5$ 입니다."
+      },
+      {
+        question_text: "좌표평면 위에서 점 $P(-3, 4)$ 가 속한 사분면은?",
+        options: ["제1사분면", "제2사분면", "제3사분면", "제4사분면", "x축 위"],
+        correct_answer: 2,
+        explanation: "$x$좌표가 음수(-)이고 $y$좌표가 양수(+)인 사분면은 제2사분면입니다."
+      },
+      {
+        question_text: "정비례 관계 $y = 3x$ 에서 $x = -2$ 일 때 $y$의 값은?",
+        options: ["$-6$", "$-3$", "$1$", "$3$", "$6$"],
+        correct_answer: 1,
+        explanation: "$y = 3 \\times (-2) = -6$ 입니다."
+      },
+      {
+        question_text: "두 수 $12$와 $18$의 최대공약수는?",
+        options: ["$2$", "$3$", "$6$", "$12$", "$36$"],
+        correct_answer: 3,
+        explanation: "$12 = 2^2 \\times 3$, $18 = 2 \\times 3^2$ 이므로 최대공약수는 $2 \\times 3 = 6$ 입니다."
+      },
+      {
+        question_text: "절댓값이 $5$인 정수를 모두 구한 것은?",
+        options: ["$5$", "$-5$", "$-5, 5$", "$0, 5$", "$-10, 10$"],
+        correct_answer: 3,
+        explanation: "원점에서의 거리가 5인 정수는 $-5$와 $+5$ 두 개입니다."
+      }
+    ],
+    "과학": [
+      {
+        question_text: "액체 상태의 물이 수증기(기체)로 상태 변화할 때 일어나는 현상으로 알맞은 것은?",
+        options: ["응고", "기화", "액화", "융해", "승화(기체→고체)"],
+        correct_answer: 2,
+        explanation: "액체가 열에너지를 흡수하여 기체로 변하는 상태 변화는 기화(Vaporization)입니다."
+      },
+      {
+        question_text: "지구의 내부 구조 중 부피가 가장 크며 고체 상태의 암석으로 이루어진 층은?",
+        options: ["지각", "맨틀", "외핵", "내핵", "대기권"],
+        correct_answer: 2,
+        explanation: "지구 전체 부피의 약 80%를 차지하며 규산염 암석으로 이루어진 층은 맨틀(Mantle)입니다."
+      },
+      {
+        question_text: "빛이 공기 중에서 물로 비스듬히 입사할 때 경계면에서 진행 방향이 꺾이는 현상은?",
+        options: ["빛의 반사", "빛의 굴절", "빛의 분산", "빛의 합성", "빛의 직진"],
+        correct_answer: 2,
+        explanation: "물질에 따른 빛의 속력 차이로 인해 진행 경로가 꺾이는 현상은 굴절(Refraction)입니다."
+      },
+      {
+        question_text: "생물 분류 체계의 7단계 중 가장 기본이 되는 단위는?",
+        options: ["계", "문", "강", "목", "종"],
+        correct_answer: 5,
+        explanation: "자연 상태에서 자유롭게 교배하여 번식 능력이 있는 자손을 낳을 수 있는 집단은 종(Species)입니다."
+      },
+      {
+        question_text: "물체가 힘을 받아 변형되었다가 힘을 없애면 원래 모양으로 되돌아가는 성질은?",
+        options: ["마찰력", "탄성력", "중력", "부력", "자기력"],
+        correct_answer: 2,
+        explanation: "변형된 물체가 원래 모양으로 복원되려는 힘은 탄성력입니다."
+      }
+    ],
+    "국어": [
+      {
+        question_text: "시에서 같은 말이나 글자, 문장 구조가 반복되면서 생기는 음악적 느낌은?",
+        options: ["심상(이미지)", "운율(리듬)", "어조", "복선", "주제"],
+        correct_answer: 2,
+        explanation: "시에서 소리의 반복을 통해 느껴지는 말의 가락이나 음악성을 운율이라고 합니다."
+      },
+      {
+        question_text: "소설의 5단계 구성 단계 중 사건의 갈등이 최고조에 달하는 단계는?",
+        options: ["발단", "전개", "위기", "절정", "결말"],
+        correct_answer: 4,
+        explanation: "인물 간의 갈등과 긴장감이 극대화되는 단계는 절정(Climax)입니다."
+      },
+      {
+        question_text: "사람이 아닌 사물이나 관념을 사람처럼 표현하는 비유법은?",
+        options: ["의인법", "활유법", "직유법", "대유법", "도치법"],
+        correct_answer: 1,
+        explanation: "'꽃이 활짝 웃는다', '바람이 노래한다'처럼 표현하는 방법은 의인법입니다."
+      }
+    ],
+    "영어": [
+      {
+        question_text: "다음 빈칸에 알맞은 be동사는? 'They _____ playing soccer in the park.'",
+        options: ["am", "is", "are", "be", "was"],
+        correct_answer: 3,
+        explanation: "주어가 3인칭 복수(They)이므로 현재형 be동사는 are가 알맞습니다."
+      },
+      {
+        question_text: "다음 중 의문문 '_____ do you live?' 에 대한 알맞은 답은?",
+        options: ["At 7 o'clock.", "In Seoul.", "Because I'm tired.", "By bus.", "Yes, I do."],
+        correct_answer: 2,
+        explanation: "'Where do you live?'(너는 어디 사니?)라는 장소 질문에는 'In Seoul.'(서울에 살아)이 알맞습니다."
+      },
+      {
+        question_text: "다음 단어의 반의어(반대말)로 올바른 것은? 'clean'",
+        options: ["bright", "dirty", "quiet", "quick", "heavy"],
+        correct_answer: 2,
+        explanation: "'clean'(깨끗한)의 반대말은 'dirty'(더러운)입니다."
+      }
+    ],
+    "사회": [
+      {
+        question_text: "지구상에서 적도 부근에 위치하여 연중 기온이 높고 강수량이 많은 기후는?",
+        options: ["열대 기후", "건조 기후", "온대 기후", "냉대 기후", "한대 기후"],
+        correct_answer: 1,
+        explanation: "가장 더운 열대 기후는 연중 강수량이 많아 밀림과 열대우림이 발달합니다."
+      },
+      {
+        question_text: "지구의 본초 자오선(경도 0도)이 지나는 영국 런던의 그리니치 천문대를 기준으로 정한 표준시는?",
+        options: ["세계 표준시(UTC)", "태양시", "지방시", "서머타임", "시차"],
+        correct_answer: 1,
+        explanation: "경도 0도 자오선을 기준으로 전 세계 시간의 기준이 되는 시간은 세계 표준시입니다."
+      }
+    ],
+    "역사": [
+      {
+        question_text: "우리나라 역사상 최초의 고대 국가로 단군왕검이 건국한 나라는?",
+        options: ["고구려", "백제", "신라", "고조선", "부여"],
+        correct_answer: 4,
+        explanation: "기원전 2333년 청동기 문화를 바탕으로 건국된 한반도 최초의 국가는 고조선입니다."
+      },
+      {
+        question_text: "신라 제24대 왕으로 한강 유역을 차지하고 전성기를 이끈 왕은?",
+        options: ["광개토대왕", "근초고왕", "진흥왕", "무열왕", "문무왕"],
+        correct_answer: 3,
+        explanation: "신라의 영토를 크게 넓히고 순수비를 세운 전성기 군주는 진흥왕입니다."
+      }
+    ]
+  }
+};
+
 class StudentApp {
   constructor(config) {
     this.config = config || { id: 'nakyung', name: '나경이', grade: 3 };
+    this.selectedSubject = "ALL"; // "ALL" or 특정 과목
     this.questions = [];
     this.currentIndex = 0;
     this.selectedAnswer = null;
     this.isGraded = false;
     this.solvedCount = 0;
     this.correctCount = 0;
+    this.sessionWrongQuestions = []; // 이번 세션에서 틀린 문제 저장
     this.init();
   }
 
   async init() {
     this.applyTheme();
+    this.initSubjectSelector();
     this.initSPenScratchpad();
     this.initEventListeners();
-    await this.loadQuestions();
+    await this.loadQuestions(false);
   }
 
   applyTheme() {
@@ -35,46 +346,193 @@ class StudentApp {
     if (gradeEl) gradeEl.innerText = `중${this.config.grade}학년`;
   }
 
-  async loadQuestions() {
-    const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  initSubjectSelector() {
+    const bar = document.getElementById("student-subject-bar");
+    if (!bar) return;
+
+    bar.querySelectorAll(".sub-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        bar.querySelectorAll(".sub-tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        this.selectedSubject = btn.dataset.sub;
+        this.loadQuestions(false);
+      });
+    });
+  }
+
+  /**
+   * 1일 20문제 스마트 생성 및 로드
+   * @param {boolean} isMoreStudy '더 공부하기' 버튼 여부 (오답 문항 1순위 강제 포함)
+   */
+  async loadQuestions(isMoreStudy = false) {
     const grade = this.config.grade;
+    const subFilter = this.selectedSubject;
 
-    // 1. 오늘자 과제 가져오기
-    const assignments = await dbService.getAllAssignments();
-    const todayAssign = assignments.find(a => a.target_grade === grade);
+    // 1. 과거 에빙하우스 오답 문항 및 이번 세션 오답 문항 수집 (1순위 포함 대상)
+    const wrongPool = [];
+    const seenQids = new Set();
 
-    let qList = [];
-    if (todayAssign) {
-      const full = await dbService.getAssignmentWithQuestions(todayAssign.assignment_id);
-      if (full && full.questions) {
-        qList = [...full.questions];
-      }
-    }
-
-    // 2. 만약 오늘자 과제가 없으면 해당 학년의 전체 문제 중 로드
-    if (qList.length === 0) {
-      const allQ = await dbService.getAllQuestions();
-      qList = allQ.filter(q => q.grade === grade);
-    }
-
-    // 3. 에빙하우스 SRS 복습 문항 중 오늘 복습해야 할 오답 문항 추가
-    const studentReviews = await dbService.getStudentReviews(this.config.id);
-    const dueReviews = studentReviews.filter(r => (r.next_review_date <= today && (r.wrongCount > 0 || !r.last_is_correct)));
-    
-    // 중복 제거 후 합치기
-    const seenIds = new Set(qList.map(q => q.question_id));
-    dueReviews.forEach(r => {
-      if (r.question && !seenIds.has(r.question_id)) {
-        r.question._isSrsReview = true;
-        qList.push(r.question);
-        seenIds.add(r.question_id);
+    // (1) 이번 세션에서 틀렸던 문제
+    this.sessionWrongQuestions.forEach(q => {
+      if (!seenQids.has(q.question_id)) {
+        if (subFilter === "ALL" || q.subject === subFilter) {
+          wrongPool.push({ ...q, _isWrongReview: true });
+          seenQids.add(q.question_id);
+        }
       }
     });
 
-    this.questions = qList;
+    // (2) Firebase SRS 복습 문항 중 오답 이력이 있는 문항
+    const studentReviews = await dbService.getStudentReviews(this.config.id);
+    const dueOrWrongs = studentReviews.filter(r => (r.wrongCount > 0 || !r.last_is_correct));
+    dueOrWrongs.forEach(r => {
+      if (r.question && !seenQids.has(r.question_id)) {
+        if (subFilter === "ALL" || r.question.subject === subFilter) {
+          wrongPool.push({ ...r.question, _isWrongReview: true });
+          seenQids.add(r.question_id);
+        }
+      }
+    });
+
+    // 2. DB에 등록된 정규 문항 수집
+    const allDbQuestions = await dbService.getAllQuestions();
+    const candidateDbPool = allDbQuestions.filter(q => {
+      if (q.grade !== grade) return false;
+      if (subFilter !== "ALL" && q.subject !== subFilter) return false;
+      return true;
+    });
+
+    // 3. 커리큘럼 뱅크 문항 수집 (내장 고품질 풀)
+    const gradeCurriculum = CURRICULUM_BANKS[grade] || {};
+    const bankPool = [];
+    if (subFilter === "ALL") {
+      Object.entries(gradeCurriculum).forEach(([sub, list]) => {
+        list.forEach((item, idx) => {
+          bankPool.push({
+            ...item,
+            question_id: `BANK_G${grade}_${sub}_${idx + 1}`,
+            grade,
+            subject: sub
+          });
+        });
+      });
+    } else if (gradeCurriculum[subFilter]) {
+      gradeCurriculum[subFilter].forEach((item, idx) => {
+        bankPool.push({
+          ...item,
+          question_id: `BANK_G${grade}_${subFilter}_${idx + 1}`,
+          grade,
+          subject: subFilter
+        });
+      });
+    }
+
+    // 4. 20문제 완성하기 (오답 우선 채우기 + 일반 문제 섞기)
+    let final20 = [];
+
+    // 오답 문항 추가 (최대 10개까지 우선 배정)
+    this.shuffleArray(wrongPool);
+    wrongPool.slice(0, 10).forEach(q => {
+      final20.push(q);
+      seenQids.add(q.question_id);
+    });
+
+    // 일반 DB 문항 추가
+    this.shuffleArray(candidateDbPool);
+    candidateDbPool.forEach(q => {
+      if (final20.length < DAILY_TARGET && !seenQids.has(q.question_id)) {
+        final20.push(q);
+        seenQids.add(q.question_id);
+      }
+    });
+
+    // 커리큘럼 뱅크 문항으로 20문제까지 채우기
+    this.shuffleArray(bankPool);
+    bankPool.forEach(q => {
+      if (final20.length < DAILY_TARGET && !seenQids.has(q.question_id)) {
+        final20.push(q);
+        seenQids.add(q.question_id);
+      }
+    });
+
+    // 만약 여전히 20문제 미만이면 문제 변형 생성기로 무조건 20문제 맞추기
+    let fillCounter = 1;
+    while (final20.length < DAILY_TARGET) {
+      const generated = this.generateDynamicQuestion(grade, subFilter, fillCounter++);
+      final20.push(generated);
+    }
+
+    // 최종 20문항을 섞어서 오답이 중간중간 자연스럽게 나오도록 배치
+    this.shuffleArray(final20);
+
+    this.questions = final20.slice(0, DAILY_TARGET);
     this.currentIndex = 0;
+    this.solvedCount = 0;
+    this.correctCount = 0;
+    this.isGraded = false;
+
     this.renderCurrentQuestion();
     this.updateProgress();
+
+    if (isMoreStudy) {
+      this.showToast(`🔥 20문제가 새롭게 생성되었습니다! (틀린 문제 복습 포함 ✨)`, "success");
+    }
+  }
+
+  /**
+   * 수학/과학 등 부족한 문제를 20개까지 무한 동적 생성하는 생성기
+   */
+  generateDynamicQuestion(grade, subject, seedNum) {
+    const sub = (subject === "ALL") ? ["수학", "과학", "국어", "영어"][seedNum % 4] : subject;
+    
+    if (sub === "수학") {
+      if (grade === 3) {
+        const a = (seedNum % 5) + 2;
+        const b = (seedNum % 4) + 1;
+        const sum = a + b;
+        const prod = a * b;
+        return {
+          question_id: `DYN_M3_MATH_${Date.now()}_${seedNum}`,
+          grade: 3,
+          subject: "수학",
+          question_text: `이차방정식 $x^2 - ${sum}x + ${prod} = 0$ 의 두 근의 합을 구하시오.`,
+          options: [`$${sum - 2}$`, `$${sum - 1}$`, `$${sum}$`, `$${sum + 1}$`, `$${sum + 2}$`],
+          correct_answer: 3,
+          explanation: `근과 계수의 관계에 의해 두 근의 합은 $-(-${sum})/1 = ${sum}$ 입니다.`
+        };
+      } else {
+        const x = (seedNum % 6) + 2;
+        const coef = (seedNum % 3) + 2;
+        const constant = (seedNum % 4) + 1;
+        const rhs = coef * x + constant;
+        return {
+          question_id: `DYN_M1_MATH_${Date.now()}_${seedNum}`,
+          grade: 1,
+          subject: "수학",
+          question_text: `일차방정식 $${coef}x + ${constant} = ${rhs}$ 의 해를 구하시오.`,
+          options: [`$x = ${x - 2}$`, `$x = ${x - 1}$`, `$x = ${x}$`, `$x = ${x + 1}$`, `$x = ${x + 2}$`],
+          correct_answer: 3,
+          explanation: `$${coef}x = ${rhs} - ${constant} = ${coef * x}$ 이므로 $x = ${x}$ 입니다.`
+        };
+      }
+    }
+
+    // 기본 대체 문항
+    return {
+      question_id: `DYN_GEN_${Date.now()}_${seedNum}`,
+      grade,
+      subject: sub,
+      question_text: `[${sub}] 다음 핵심 개념 중 올바른 설명으로 가장 알맞은 것은? (세트 ${seedNum}번)`,
+      options: [
+        "기본 개념 원리를 바르게 이해하고 적용한다.",
+        "항상 반대되는 성질만을 암기한다.",
+        "공식과 풀이 과정을 점검하지 않는다.",
+        "오답 복습 없이 문제만 많이 푼다.",
+        "지문과 보기를 대조하지 않는다."
+      ],
+      correct_answer: 1,
+      explanation: "기본 개념의 핵심 원리를 명확하게 이해하고 풀이 과정을 꼼꼼히 점검하는 것이 올바른 학습법입니다."
+    };
   }
 
   renderCurrentQuestion() {
@@ -92,20 +550,23 @@ class StudentApp {
     this.selectedAnswer = null;
     this.isGraded = false;
 
-    // 카운터
+    // 카운터: 1 / 20 문항
     const counterEl = document.getElementById("q-counter-text");
     if (counterEl) {
-      counterEl.innerText = `문항 ${this.currentIndex + 1} / ${this.questions.length}`;
+      counterEl.innerText = `오늘의 과제 ${this.currentIndex + 1} / ${this.questions.length} 문항`;
     }
 
     // 과목 뱃지
     const subPill = document.getElementById("q-subject-pill");
     if (subPill) subPill.innerText = q.subject || "공통";
 
-    // SRS 뱃지
+    // 오답 다시 풀기 뱃지
     const srsBadge = document.getElementById("q-srs-badge");
     if (srsBadge) {
-      srsBadge.style.display = q._isSrsReview ? "inline-block" : "none";
+      srsBadge.style.display = q._isWrongReview ? "inline-block" : "none";
+      if (q._isWrongReview) {
+        srsBadge.innerText = "🔥 틀린 문제 집중 복습";
+      }
     }
 
     // 지문
@@ -172,7 +633,6 @@ class StudentApp {
     const nextBtn = document.getElementById("btn-next-question");
     if (nextBtn) nextBtn.style.display = "none";
 
-    // 화면 상단으로 부드럽게 스크롤
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -180,7 +640,6 @@ class StudentApp {
     if (this.isGraded) return;
     this.selectedAnswer = num;
 
-    // 햅틱 진동 피드백 (갤럭시 지원 시)
     if (navigator.vibrate) {
       navigator.vibrate(15);
     }
@@ -201,12 +660,17 @@ class StudentApp {
     const isCorrect = (Number(this.selectedAnswer) === Number(q.correct_answer));
 
     this.solvedCount++;
-    if (isCorrect) this.correctCount++;
+    if (isCorrect) {
+      this.correctCount++;
+    } else {
+      // 오답 목록에 보관 (더 공부하기 누를 때 즉시 포함)
+      this.sessionWrongQuestions.push(q);
+    }
 
-    // 1. Firebase Cloud Firestore 실시간 채점 기록
+    // Firebase Cloud Firestore 실시간 채점 기록
     await dbService.submitAnswer(this.config.id, q.question_id, this.selectedAnswer);
 
-    // 2. 보기 하이라이트
+    // 보기 하이라이트
     document.querySelectorAll(".opt-card-btn").forEach(btn => {
       btn.disabled = true;
       const num = Number(btn.dataset.num);
@@ -217,7 +681,7 @@ class StudentApp {
       }
     });
 
-    // 3. 해설 및 피드백 표시
+    // 해설 및 피드백 표시
     const explCard = document.getElementById("q-explanation-card");
     if (explCard) {
       explCard.style.display = "block";
@@ -232,25 +696,23 @@ class StudentApp {
         </div>
         ${!isCorrect ? `
           <div style="margin-top: 8px; font-size: 0.85rem; color: #fda4af;">
-            🌱 ${this.config.name}아, 걱정 마! 3일 뒤 에빙하우스 복습에서 다시 맞혀보자!
+            🌱 ${this.config.name}아, 걱정 마! '더 공부하기' 누르면 다시 도전할 수 있어!
           </div>
         ` : ''}
       `;
     }
 
-    // 4. 맞췄을 때 팡파르 축하 효과!
     if (isCorrect) {
       this.triggerConfetti();
     }
 
-    // 버튼 토글
     const submitBtn = document.getElementById("btn-submit-answer");
     if (submitBtn) submitBtn.style.display = "none";
 
     const nextBtn = document.getElementById("btn-next-question");
     if (nextBtn) {
       nextBtn.style.display = "block";
-      nextBtn.innerText = (this.currentIndex + 1 === this.questions.length) ? "🏆 최종 결과 보기" : "다음 문제 풀기 ➔";
+      nextBtn.innerText = (this.currentIndex + 1 === this.questions.length) ? "🏆 20문제 결과 보기" : "다음 문제 풀기 ➔";
     }
 
     this.updateProgress();
@@ -271,7 +733,7 @@ class StudentApp {
     if (fillEl) fillEl.style.width = `${pct}%`;
 
     const pctText = document.getElementById("progress-pct-text");
-    if (pctText) pctText.innerText = `${pct}% 완료`;
+    if (pctText) pctText.innerText = `${current} / ${total} 문항 (${pct}%)`;
   }
 
   renderCompletionScreen() {
@@ -281,37 +743,55 @@ class StudentApp {
     this.triggerConfetti();
 
     const rate = this.solvedCount > 0 ? Math.round((this.correctCount / this.solvedCount) * 100) : 100;
+    const wrongCnt = this.solvedCount - this.correctCount;
 
     main.innerHTML = `
       <div class="completion-celebration-card">
         <div class="celebration-trophy">🏆</div>
-        <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 8px;">
-          오늘의 과제 100% 완료!
+        <h2 style="font-size: 1.85rem; font-weight: 800; margin-bottom: 8px;">
+          오늘의 20문제 목표 달성!
         </h2>
-        <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-          ${this.config.name}아, 오늘 목표를 멋지게 달성했어! 정말 자랑스러워 ✨
+        <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 1.75rem;">
+          ${this.config.name}아, 집중해서 20문제를 끝까지 완주했어! 정말 대단해 ✨
         </p>
 
-        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem;">
-          <div style="background: rgba(255, 255, 255, 0.06); padding: 16px 24px; border-radius: 16px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px;">풀이 문항</div>
-            <div style="font-size: 1.7rem; font-weight: 800; color: #fff;">${this.solvedCount}문제</div>
+        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+          <div style="background: rgba(255, 255, 255, 0.06); padding: 16px 28px; border-radius: 18px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px;">푼 문제</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: #fff;">${this.solvedCount}문제</div>
           </div>
-          <div style="background: rgba(255, 255, 255, 0.06); padding: 16px 24px; border-radius: 16px; border: 1px solid var(--border-glass);">
-            <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px;">맞힌 정답률</div>
-            <div style="font-size: 1.7rem; font-weight: 800; color: var(--accent-emerald);">${rate}%</div>
+          <div style="background: rgba(255, 255, 255, 0.06); padding: 16px 28px; border-radius: 18px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px;">정답률</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-emerald);">${rate}%</div>
+          </div>
+          <div style="background: rgba(255, 255, 255, 0.06); padding: 16px 28px; border-radius: 18px; border: 1px solid var(--border-glass);">
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px;">복습할 오답</div>
+            <div style="font-size: 1.8rem; font-weight: 800; color: ${wrongCnt > 0 ? 'var(--accent-amber)' : 'var(--accent-emerald)'};">
+              ${wrongCnt}개
+            </div>
           </div>
         </div>
 
-        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 14px; max-width: 480px; margin: 0 auto 2rem auto; font-size: 0.95rem; color: #a7f3d0;">
-          📡 아빠의 관제 대시보드(Firebase)에 학습 완료 리포트가 실시간 전송되었습니다!
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 14px 20px; max-width: 520px; margin: 0 auto 2.5rem auto; font-size: 0.95rem; color: #a7f3d0;">
+          📡 아빠의 관제 대시보드(Firebase)에 20문제 학습 결과가 실시간으로 전송되었습니다!
         </div>
 
-        <button type="button" class="btn-student-next" style="margin: 0 auto; display: inline-block;" onclick="window.location.reload()">
-          🔄 다시 확인하기
-        </button>
+        <!-- 핵심: 더 공부하기 액션 버튼 -->
+        <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+          <button type="button" class="btn-more-study" id="btn-study-more">
+            <span>🔥</span> 20문제 더 공부하기 (틀린 문제 포함)
+          </button>
+          <button type="button" class="btn-student-next" style="background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-glass);" onclick="window.location.reload()">
+            🔄 처음부터 다시 풀기
+          </button>
+        </div>
       </div>
     `;
+
+    // 더 공부하기 버튼 이벤트 바인딩
+    document.getElementById("btn-study-more")?.addEventListener("click", () => {
+      this.loadQuestions(true);
+    });
   }
 
   renderEmptyState() {
@@ -321,13 +801,13 @@ class StudentApp {
       <div class="completion-celebration-card" style="border-color: var(--border-glass);">
         <div style="font-size: 4rem; margin-bottom: 1rem;">🌴</div>
         <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 8px;">
-          오늘 등록된 과제가 없습니다
+          선택한 과목의 문제를 준비 중입니다
         </h2>
         <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
-          아빠가 새로운 과제를 등록해 주시면 여기에 나타납니다.
+          '전체 과목' 또는 다른 과목을 선택해 보세요.
         </p>
-        <button type="button" class="btn-student-next" onclick="window.location.reload()">
-          🔄 새로고침
+        <button type="button" class="btn-student-next" onclick="window.studentApp.loadQuestions(false)">
+          🔄 20문제 새로 생성하기
         </button>
       </div>
     `;
@@ -347,6 +827,37 @@ class StudentApp {
     });
   }
 
+  shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  showToast(msg, type = "info") {
+    const t = document.createElement("div");
+    t.style.position = "fixed";
+    t.style.bottom = "24px";
+    t.style.left = "50%";
+    t.style.transform = "translateX(-50%)";
+    t.style.background = type === "success" ? "#10b981" : "#8b5cf6";
+    t.style.color = "#fff";
+    t.style.padding = "10px 22px";
+    t.style.borderRadius = "999px";
+    t.style.fontWeight = "700";
+    t.style.fontSize = "0.95rem";
+    t.style.boxShadow = "0 6px 20px rgba(0,0,0,0.4)";
+    t.style.zIndex = "9999";
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => {
+      t.style.opacity = "0";
+      t.style.transition = "opacity 0.3s";
+      setTimeout(() => t.remove(), 300);
+    }, 2800);
+  }
+
   // --- S-Pen & 터치 풀이 연습장 엔진 ---
   initSPenScratchpad() {
     const toggleBtn = document.getElementById("btn-toggle-spen");
@@ -362,7 +873,6 @@ class StudentApp {
     let currentColor = "#ffffff";
     let currentWidth = 3;
 
-    // 캔버스 크기 리사이징
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * (window.devicePixelRatio || 1);
@@ -391,7 +901,6 @@ class StudentApp {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    // 컬러 선택
     document.querySelectorAll(".color-dot").forEach(dot => {
       dot.addEventListener("click", () => {
         document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
@@ -401,7 +910,6 @@ class StudentApp {
       });
     });
 
-    // 드로잉 포인터 이벤트 (S-Pen 및 터치 지원)
     const getPos = (e) => {
       const rect = canvas.getBoundingClientRect();
       return {
@@ -439,7 +947,6 @@ class StudentApp {
   }
 
   triggerConfetti() {
-    // 경량 CSS/JS 파티클 폭죽 효과
     const count = 40;
     for (let i = 0; i < count; i++) {
       const p = document.createElement("div");
