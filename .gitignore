@@ -11,6 +11,8 @@ venv/
 serviceAccountKey.json
 *.key
 google-services.json
+notification_secrets.json
+test_email.py
 
 # IDE & OS
 .vscode/

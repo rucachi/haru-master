@@ -1,0 +1,56 @@
+name: HaruMaster Auto Notifier & Weekly Report
+
+on:
+  schedule:
+    # 매일 한국 시간 21:00 (UTC 12:00): 당일 학습 점검 및 미완료 시 카카오톡 알림
+    - cron: '0 12 * * *'
+    # 매주 일요일 한국 시간 21:30 (UTC 12:30): 주간 학습 진단 리포트 이메일 발송
+    - cron: '30 12 * * 0'
+  workflow_dispatch:
+    inputs:
+      action_type:
+        description: '실행할 작업 선택'
+        required: true
+        default: 'check_daily'
+        type: choice
+        options:
+          - check_daily
+          - weekly_report
+          - test_all
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 파이썬 환경 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 당일 저녁 9시 카카오톡 학습 점검 (Daily 21:00 KST)
+        if: github.event.schedule == '0 12 * * *' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action_type == 'check_daily')
+        env:
+          KAKAO_ACCESS_TOKEN: ${{ secrets.KAKAO_ACCESS_TOKEN }}
+          NAVER_APP_PASSWORD: ${{ secrets.NAVER_APP_PASSWORD }}
+        run: |
+          python study_notifier.py --check-daily
+
+      - name: 주간 종합 진단 리포트 네이버 메일 발송 (Sunday 21:30 KST)
+        if: github.event.schedule == '30 12 * * 0' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action_type == 'weekly_report')
+        env:
+          KAKAO_ACCESS_TOKEN: ${{ secrets.KAKAO_ACCESS_TOKEN }}
+          NAVER_APP_PASSWORD: ${{ secrets.NAVER_APP_PASSWORD }}
+        run: |
+          python study_notifier.py --weekly-report
+
+      - name: 전체 알림/메일 테스트 (수동 테스트용)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action_type == 'test_all'
+        env:
+          KAKAO_ACCESS_TOKEN: ${{ secrets.KAKAO_ACCESS_TOKEN }}
+          NAVER_APP_PASSWORD: ${{ secrets.NAVER_APP_PASSWORD }}
+        run: |
+          python study_notifier.py --test-all
