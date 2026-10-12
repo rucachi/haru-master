@@ -130,6 +130,34 @@ const INITIAL_SEED_DATA = {
     }
   },
   reviews: {
+    "chahye": {
+      "M1_MATH_001": {
+        question_id: "M1_MATH_001",
+        interval: 3,
+        wrongCount: 0,
+        next_review_date: "20261016",
+        last_is_correct: true,
+        last_solved_at: "2026-10-13T10:00:00"
+      }
+    },
+    "nakyung": {
+      "M3_MATH_001": {
+        question_id: "M3_MATH_001",
+        interval: 1,
+        wrongCount: 2,
+        next_review_date: "20261013",
+        last_is_correct: false,
+        last_solved_at: "2026-10-12T15:30:00"
+      },
+      "M3_SCI_001": {
+        question_id: "M3_SCI_001",
+        interval: 7,
+        wrongCount: 0,
+        next_review_date: "20261020",
+        last_is_correct: true,
+        last_solved_at: "2026-10-13T16:00:00"
+      }
+    },
     "CHILD_G1": {
       "M1_MATH_001": {
         question_id: "M1_MATH_001",

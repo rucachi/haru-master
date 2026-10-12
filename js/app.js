@@ -10,7 +10,7 @@ import { dbService } from './firebase-service.js';
 // 애플리케이션 상태 (State)
 const state = {
   activeTab: "studio",
-  activeStudent: "CHILD_G3", // CHILD_G1 (중1) or CHILD_G3 (중3)
+  activeStudent: "nakyung", // "nakyung" (나경이, 중3) or "chahye" (차혜, 중1)
   currentSubject: "수학",
   currentGrade: 3,
   tabletSelectedAnswer: null,
@@ -209,7 +209,7 @@ function initStudentSelector() {
       btns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       state.activeStudent = btn.dataset.student;
-      state.currentGrade = (state.activeStudent === "CHILD_G1") ? 1 : 3;
+      state.currentGrade = (state.activeStudent === "chahye" || state.activeStudent === "CHILD_G1") ? 1 : 3;
 
       // 출제 폼 학년 자동 반영
       const gradeSelect = document.getElementById("input-grade");
@@ -986,7 +986,7 @@ function handleApplyParser() {
 // ==============================================================================
 async function renderOverviewTab() {
   const student = state.activeStudent;
-  const grade = (student === "CHILD_G1") ? 1 : 3;
+  const grade = (student === "chahye" || student === "CHILD_G1") ? 1 : 3;
 
   // 통계 집계
   const stats = await dbService.getStudentStats(student);

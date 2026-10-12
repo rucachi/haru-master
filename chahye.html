@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>차혜의 하루마스터 👦 (중1 일일 학습)</title>
+  <meta name="description" content="차혜(중1) 전용 태블릿 스마트 일일 과제 & 에빙하우스 복습 앱">
+  <meta name="theme-color" content="#06b6d4">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- KaTeX 수식 엔진 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <!-- 학생 태블릿 전용 스타일 -->
+  <link rel="stylesheet" href="css/student.css">
+</head>
+<body class="theme-chahye">
+
+  <!-- 학생 태블릿 상단 헤더 -->
+  <header class="student-header">
+    <div class="student-brand">
+      <div class="student-avatar" style="background: linear-gradient(135deg, #06b6d4, #10b981);">👦</div>
+      <div class="student-title-wrap">
+        <h1>
+          <span id="student-name-text">차혜</span>의 하루마스터
+          <span class="student-grade-badge" id="student-grade-badge" style="color: #67e8f9;">중1학년</span>
+        </h1>
+      </div>
+    </div>
+
+    <div class="student-header-actions">
+      <!-- S-Pen 연습장 열기 버튼 -->
+      <button type="button" class="btn-spen-toggle" id="btn-toggle-spen" title="S펜 풀이 연습장 열기">
+        <span>✏️</span> S펜 연습장
+      </button>
+
+      <!-- 클라우드 연동 상태 -->
+      <div class="sync-badge">
+        <span class="sync-dot"></span>
+        <span>Firebase 동기화</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 일일 진행률 프로그레스 바 -->
+  <div class="progress-container">
+    <div class="progress-header">
+      <span id="q-counter-text">문항 로딩 중...</span>
+      <span id="progress-pct-text">0% 완료</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar-fill"></div>
+    </div>
+  </div>
+
+  <!-- 메인 학습 뷰어 -->
+  <main class="student-main-content" id="student-main-content">
+    
+    <div class="q-card" id="q-card">
+      <div class="q-meta-row">
+        <span class="q-subject-pill" id="q-subject-pill">국어</span>
+        <span class="q-srs-badge" id="q-srs-badge" style="display: none;">🔥 에빙하우스 오답 복습</span>
+      </div>
+
+      <!-- 지문 영역 (국어/영어) -->
+      <div class="q-passage-box" id="q-passage-box" style="display: none;"></div>
+
+      <!-- 문제 본문 -->
+      <div class="q-text-body" id="q-text-body">
+        문제를 불러오는 중입니다...
+      </div>
+
+      <!-- 다이어그램 (도형/실험도) -->
+      <div class="q-diagram-box" id="q-diagram-box" style="display: none;">
+        <img id="q-diagram-img" src="" alt="문제 다이어그램">
+      </div>
+
+      <!-- 보기 1~5번 -->
+      <div class="q-options-container" id="q-options-container">
+        <!-- 동적 생성 -->
+      </div>
+
+      <!-- 채점 후 해설 박스 -->
+      <div class="q-explanation-card" id="q-explanation-card" style="display: none;"></div>
+
+      <!-- 하단 액션 버튼 행 -->
+      <div class="q-actions-row">
+        <button type="button" class="btn-student-submit" id="btn-submit-answer" disabled>
+          ✓ 답안 제출 및 채점
+        </button>
+        <button type="button" class="btn-student-next" id="btn-next-question" style="display: none;">
+          다음 문제 풀기 ➔
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- S-Pen & 터치 풀이 연습장 드로어 (Scratchpad Drawer) -->
+  <div class="spen-scratchpad-drawer" id="spen-drawer">
+    <div class="scratchpad-toolbar">
+      <div class="scratchpad-tools-left">
+        <span style="font-size: 0.82rem; font-weight: 700; color: #fff; margin-right: 4px;">🖊️ 펜 색상:</span>
+        <div class="color-dot active" data-color="#ffffff" data-width="3" style="background: #ffffff;" title="화이트"></div>
+        <div class="color-dot" data-color="#fef08a" data-width="3" style="background: #fef08a;" title="옐로우"></div>
+        <div class="color-dot" data-color="#38bdf8" data-width="3" style="background: #38bdf8;" title="네온블루"></div>
+        <div class="color-dot" data-color="#34d399" data-width="3" style="background: #34d399;" title="에메랄드"></div>
+        <div class="color-dot" data-color="#0f172a" data-width="16" style="background: #334155; border: 1px solid #fff;" title="지우개"></div>
+        <button type="button" class="tool-btn" id="spen-clear-btn" style="margin-left: 8px;">🗑️ 전체 지우기</button>
+      </div>
+      <div>
+        <button type="button" class="tool-btn" id="spen-close-btn">✕ 연습장 닫기</button>
+      </div>
+    </div>
+    <canvas class="scratchpad-canvas" id="spen-canvas"></canvas>
+  </div>
+
+  <!-- 차혜(중1) 학생 설정 주입 -->
+  <script>
+    window.STUDENT_CONFIG = {
+      id: 'chahye',
+      name: '차혜',
+      grade: 1,
+      theme: 'chahye'
+    };
+  </script>
+
+  <!-- 학생 전용 로직 모듈 -->
+  <script type="module" src="js/student-app.js"></script>
+
+</body>
+</html>

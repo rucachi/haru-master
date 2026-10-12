@@ -1,0 +1,557 @@
+/* ==============================================================================
+   하루마스터 (HaruMaster) - 자녀 전용 태블릿 웹 앱 스타일시트 (Student Tablet Theme)
+   갤럭시 탭 / 갤럭시 노트 S-Pen 및 터치 인터페이스 최적화
+   ============================================================================== */
+
+:root {
+  --bg-dark: #0a0e17;
+  --bg-card: rgba(18, 24, 38, 0.85);
+  --bg-card-solid: #121826;
+  --bg-elevated: rgba(30, 41, 59, 0.7);
+  --border-glass: rgba(255, 255, 255, 0.12);
+  --border-focus: rgba(168, 85, 247, 0.5);
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --accent-emerald: #10b981;
+  --accent-rose: #f43f5e;
+  --accent-amber: #f59e0b;
+  --accent-cyan: #06b6d4;
+
+  /* 나경이 테마 (기본: 퍼플/로즈골드) */
+  --student-primary: #8b5cf6;
+  --student-primary-glow: rgba(139, 92, 246, 0.35);
+  --student-accent: #f472b6;
+  --student-bg-gradient: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.18) 0%, transparent 45%),
+                         radial-gradient(circle at 90% 80%, rgba(244, 114, 182, 0.14) 0%, transparent 50%),
+                         #0a0e17;
+}
+
+/* 차혜 테마 (스카이블루/에메랄드) */
+body.theme-chahye {
+  --student-primary: #06b6d4;
+  --student-primary-glow: rgba(6, 182, 212, 0.35);
+  --student-accent: #10b981;
+  --student-bg-gradient: radial-gradient(circle at 10% 20%, rgba(6, 182, 212, 0.18) 0%, transparent 45%),
+                         radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.14) 0%, transparent 50%),
+                         #0a0e17;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; /* 태블릿 조작 시 텍스트 긁힘 방지 */
+}
+
+input, textarea {
+  user-select: text;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
+  background: var(--student-bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  touch-action: manipulation;
+}
+
+/* --- 상단 태블릿 헤더 --- */
+.student-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.5rem;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-glass);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.student-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.student-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--student-primary), var(--student-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px var(--student-primary-glow);
+}
+
+.student-title-wrap h1 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-grade-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--student-accent);
+}
+
+.student-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-spen-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-glass);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-spen-toggle:hover, .btn-spen-toggle.active {
+  background: var(--student-primary);
+  box-shadow: 0 4px 14px var(--student-primary-glow);
+  border-color: transparent;
+}
+
+.sync-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.sync-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+}
+
+/* --- 상단 진행률 프로그레스 바 --- */
+.progress-container {
+  padding: 0.75rem 1.5rem;
+  background: rgba(18, 24, 38, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+}
+
+.progress-bar-wrap {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--student-primary), var(--student-accent));
+  border-radius: 999px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- 메인 학습 레이아웃 (태블릿 2단 or 1단 반응형) --- */
+.student-main-content {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* 문제 카드 */
+.q-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.q-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.q-subject-pill {
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: var(--student-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--student-primary-glow);
+}
+
+.q-srs-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent-amber);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* 지문 박스 */
+.q-passage-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  padding: 1.25rem;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  color: #cbd5e1;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+/* 문제 본문 */
+.q-text-body {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: #ffffff;
+  user-select: text;
+}
+
+/* 도형/실험도 다이어그램 */
+.q-diagram-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  margin: 0.5rem 0;
+  cursor: zoom-in;
+}
+
+.q-diagram-box img {
+  max-width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* 선택지 보기 버튼들 */
+.q-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.opt-card-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  color: var(--text-main);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.opt-card-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-focus);
+  transform: translateY(-2px);
+}
+
+.opt-card-btn.selected {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: var(--student-primary);
+  box-shadow: 0 4px 16px var(--student-primary-glow);
+}
+
+body.theme-chahye .opt-card-btn.selected {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: var(--student-primary);
+  box-shadow: 0 4px 16px var(--student-primary-glow);
+}
+
+.opt-num-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.opt-card-btn.selected .opt-num-circle {
+  background: var(--student-primary);
+  color: #fff;
+}
+
+.opt-text-wrap {
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* 정답/오답 하이라이트 */
+.opt-card-btn.correct-reveal {
+  border-color: var(--accent-emerald) !important;
+  background: rgba(16, 185, 129, 0.18) !important;
+}
+
+.opt-card-btn.correct-reveal .opt-num-circle {
+  background: var(--accent-emerald) !important;
+}
+
+.opt-card-btn.wrong-reveal {
+  border-color: var(--accent-rose) !important;
+  background: rgba(244, 63, 94, 0.18) !important;
+}
+
+.opt-card-btn.wrong-reveal .opt-num-circle {
+  background: var(--accent-rose) !important;
+}
+
+/* 해설 박스 */
+.q-explanation-card {
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.98rem;
+  line-height: 1.7;
+  animation: fadeIn 0.3s ease;
+}
+
+.q-explanation-card.success {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #a7f3d0;
+}
+
+.q-explanation-card.fail {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fecdd3;
+}
+
+/* 하단 액션 버튼 행 */
+.q-actions-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 12px;
+}
+
+.btn-student-submit {
+  flex: 1;
+  background: linear-gradient(135deg, var(--student-primary), var(--student-accent));
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 1rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--student-primary-glow);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-student-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn-student-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-student-next {
+  background: var(--accent-emerald);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 1rem 2rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-student-next:hover {
+  transform: translateY(-2px);
+}
+
+/* --- S-Pen & 터치 풀이 연습장 (Scratchpad Canvas) --- */
+.spen-scratchpad-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48vh;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(24px);
+  border-top: 2px solid var(--student-primary);
+  box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.6);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(105%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spen-scratchpad-drawer.open {
+  transform: translateY(0);
+}
+
+.scratchpad-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.scratchpad-tools-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.color-dot.active {
+  transform: scale(1.25);
+  border-color: #fff;
+}
+
+.tool-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-glass);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tool-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.scratchpad-canvas {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none; /* S-Pen 드로잉 중 화면 스크롤 차단 */
+}
+
+/* --- 과제 완료 축하 화면 --- */
+.completion-celebration-card {
+  text-align: center;
+  padding: 3.5rem 2rem;
+  background: var(--bg-card);
+  border-radius: 28px;
+  border: 2px solid var(--accent-emerald);
+  box-shadow: 0 16px 48px rgba(16, 185, 129, 0.25);
+  animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.celebration-trophy {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+  animation: bounce 1.2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
