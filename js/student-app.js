@@ -3,10 +3,11 @@
  * 첫째 나경이(중3) / 둘째 차혜(중1) 과목 선택, 1일 20문제 학습 및 "더 공부하기(오답 포함)" 엔진
  */
 
-import { dbService } from './firebase-service.js?v=c2f6a1b';
+import { dbService } from './firebase-service.js?v=f9e05cf';
 
 // 기본 1일 학습 문항 수
 const DAILY_TARGET = 20;
+const DATASET_VERSION = "20261012-1080";
 
 // 중학교 학년별/과목별 교육과정 기반 풍부한 문제 생성 뱅크 (20문제 풀 세트 보장)
 const CURRICULUM_BANKS = {
@@ -435,8 +436,11 @@ class StudentApp {
     let allDbQuestions = await dbService.getAllQuestions();
     let gradeDbCount = allDbQuestions.filter(q => q.grade === grade).length;
 
-    // 만약 현재 학년의 DB 문항이 아직 충분치 않다면, 생성된 2학기 전용 데이터셋(480/380) 자동 로드
-    if (gradeDbCount < 40) {
+    const datasetVersionKey = `harumaster_dataset_version_${grade}`;
+    const needsDatasetRefresh = localStorage.getItem(datasetVersionKey) !== DATASET_VERSION;
+
+    // 데이터셋 버전이 바뀌었거나 로컬 DB가 비어 있으면 최신 학생별 JSON을 다시 반영한다.
+    if (needsDatasetRefresh || gradeDbCount < 40) {
       try {
         const file = (grade === 3) 
           ? "study_data/nakyeong/nakyung_questions_480.json" 
@@ -446,6 +450,7 @@ class StudentApp {
           const list = await res.json();
           if (requestId !== this.loadRequestId) return;
           await dbService.importJSON(JSON.stringify(list));
+          localStorage.setItem(datasetVersionKey, DATASET_VERSION);
           allDbQuestions = await dbService.getAllQuestions();
         }
       } catch (err) {
