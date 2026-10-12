@@ -10095,5 +10095,215 @@
     ],
     "correct_answer": 2,
     "explanation": "친절한 행동을 경험할 때 분비되어 공감과 너그러움을 촉진하는 호르몬으로 옥시토신(oxytocin)이 명시되었습니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_001",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "VI. 원의 성질 심화",
+    "difficulty": "easy",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "원 O의 접선이 접점 T에서 반지름 OT와 이루는 각의 크기는?",
+    "options": [
+      "0°",
+      "45°",
+      "60°",
+      "90°",
+      "180°"
+    ],
+    "correct_answer": 4,
+    "explanation": "원의 접선은 접점을 지나는 반지름과 수직이므로 두 직선이 이루는 각은 $90^\\circ$입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_002",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "IV. 이차방정식",
+    "difficulty": "easy",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "이차방정식 $x^2-9x+20=0$의 두 근의 곱은?",
+    "options": [
+      "9",
+      "-9",
+      "20",
+      "-20",
+      "29"
+    ],
+    "correct_answer": 3,
+    "explanation": "근과 계수의 관계에 따라 두 근의 곱은 상수항 20을 최고차항 계수 1로 나눈 값인 20입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_003",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "V. 삼각비",
+    "difficulty": "easy",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "직각삼각형에서 한 예각이 $30^\\circ$이고 빗변의 길이가 14cm일 때 그 각의 맞은편 변의 길이는?",
+    "options": [
+      "5cm",
+      "6cm",
+      "7cm",
+      "8cm",
+      "10cm"
+    ],
+    "correct_answer": 3,
+    "explanation": "$\\sin30^\\circ=\\frac{1}{2}$이므로 맞은편 변의 길이는 $14\\times\\frac{1}{2}=7$cm입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_004",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "VII. 통계",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "함수 $y=-(x-2)^2+5$의 그래프의 꼭짓점 좌표는?",
+    "options": [
+      "(-2, 5)",
+      "(2, 5)",
+      "(2, -5)",
+      "(-2, -5)",
+      "(5, 2)"
+    ],
+    "correct_answer": 2,
+    "explanation": "$y=a(x-p)^2+q$의 꼭짓점은 $(p,q)$이므로 꼭짓점은 $(2,5)$입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_005",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "VI. 원의 성질 심화",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "반지름이 6cm이고 중심각이 $120^\\circ$인 부채꼴의 넓이는?",
+    "options": [
+      "$6\\pi$cm²",
+      "$9\\pi$cm²",
+      "$12\\pi$cm²",
+      "$18\\pi$cm²",
+      "$36\\pi$cm²"
+    ],
+    "correct_answer": 3,
+    "explanation": "부채꼴의 넓이는 $\\pi r^2\\times\\frac{120}{360}=36\\pi\\times\\frac{1}{3}=12\\pi$cm²입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_006",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "VI. 도형의 닮음",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "닮음비가 작은 도형:큰 도형=$3:5$이고 작은 도형의 대응하는 변의 길이가 12cm일 때 큰 도형의 변의 길이는?",
+    "options": [
+      "15cm",
+      "18cm",
+      "20cm",
+      "24cm",
+      "30cm"
+    ],
+    "correct_answer": 3,
+    "explanation": "$3:5=12:x$이므로 $x=12\\times\\frac{5}{3}=20$cm입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_007",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "VII. 통계",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "여학생 5명과 남학생 3명 중에서 2명을 임의로 뽑을 때 두 명 모두 여학생일 확률은?",
+    "options": [
+      "$\\frac{1}{4}$",
+      "$\\frac{5}{14}$",
+      "$\\frac{3}{8}$",
+      "$\\frac{2}{7}$",
+      "$\\frac{1}{2}$"
+    ],
+    "correct_answer": 2,
+    "explanation": "전체 경우의 수는 $\\binom{8}{2}=28$, 여학생만 뽑는 경우는 $\\binom{5}{2}=10$이므로 확률은 $\\frac{10}{28}=\\frac{5}{14}$입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_008",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "VII. 통계",
+    "difficulty": "hard",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "자료 6, 8, 10, 12, $x$의 평균이 10일 때 $x$의 값은?",
+    "options": [
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+    ],
+    "correct_answer": 3,
+    "explanation": "전체 합은 $10\\times5=50$이고 알려진 네 수의 합은 36이므로 $x=50-36=14$입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_009",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "VI. 원의 성질 심화",
+    "difficulty": "hard",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "반지름의 길이가 10cm인 원에서 중심과 현 사이의 거리가 6cm일 때 현의 길이는?",
+    "options": [
+      "8cm",
+      "12cm",
+      "16cm",
+      "18cm",
+      "20cm"
+    ],
+    "correct_answer": 3,
+    "explanation": "중심에서 현에 내린 수선은 현을 이등분합니다. 직각삼각형에서 현의 절반은 $\\sqrt{10^2-6^2}=8$cm이므로 현의 길이는 16cm입니다."
+  },
+  {
+    "question_id": "PILOT_G3_MATH_010",
+    "grade": 3,
+    "subject": "수학",
+    "chapter": "III. 연립방정식",
+    "difficulty": "hard",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "연립방정식 $2x+y=11$, $x-y=1$을 만족하는 순서쌍 $(x,y)$는?",
+    "options": [
+      "(2, 7)",
+      "(3, 5)",
+      "(4, 3)",
+      "(5, 1)",
+      "(6, -1)"
+    ],
+    "correct_answer": 3,
+    "explanation": "두 식을 더하면 $3x=12$이므로 $x=4$이고, $x-y=1$에서 $y=3$입니다. 따라서 $(x,y)=(4,3)$입니다."
   }
 ]

@@ -8346,5 +8346,215 @@
     ],
     "correct_answer": 2,
     "explanation": "뒷말 대신 미소와 서로를 응원하고 지지하는 따뜻한 학급 분위기로 바뀌었습니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_001",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "3단원. 입체도형",
+    "difficulty": "easy",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "가로 6cm, 세로 4cm, 높이 3cm인 직육면체의 부피는?",
+    "options": [
+      "60cm³",
+      "64cm³",
+      "72cm³",
+      "80cm³",
+      "96cm³"
+    ],
+    "correct_answer": 3,
+    "explanation": "직육면체의 부피는 가로 × 세로 × 높이이므로 6 × 4 × 3 = 72cm³입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_002",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "4단원. 통계",
+    "difficulty": "easy",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "자료 2, 3, 3, 5, 7의 중앙값은?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5",
+      "7"
+    ],
+    "correct_answer": 2,
+    "explanation": "자료가 크기순으로 정렬되어 있고 자료의 개수가 5개이므로 가운데 값인 3이 중앙값입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_003",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "4단원. 통계",
+    "difficulty": "easy",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "상자에 같은 크기의 공 10개가 들어 있고 그중 파란 공이 4개이다. 공 1개를 임의로 꺼낼 때 파란 공일 확률은?",
+    "options": [
+      "$\\frac{1}{5}$",
+      "$\\frac{2}{5}$",
+      "$\\frac{1}{2}$",
+      "$\\frac{3}{5}$",
+      "$\\frac{4}{5}$"
+    ],
+    "correct_answer": 2,
+    "explanation": "전체 10개 중 파란 공이 4개이므로 확률은 $\\frac{4}{10}=\\frac{2}{5}$입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_004",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "5단원. 문자와 식",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "방정식 $5x-8=27$을 만족하는 $x$의 값은?",
+    "options": [
+      "4",
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "correct_answer": 4,
+    "explanation": "$5x=35$이므로 양변을 5로 나누면 $x=7$입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_005",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "3단원. 입체도형",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "정다각형의 한 외각의 크기가 $45^\\circ$일 때 이 정다각형의 변의 개수는?",
+    "options": [
+      "6개",
+      "8개",
+      "10개",
+      "12개",
+      "16개"
+    ],
+    "correct_answer": 2,
+    "explanation": "정다각형의 외각의 합은 $360^\\circ$이므로 변의 개수는 $360\\div45=8$개입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_006",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "3단원. 입체도형",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "가로 2cm, 세로 3cm, 높이 4cm인 직육면체의 겉넓이는?",
+    "options": [
+      "48cm²",
+      "52cm²",
+      "56cm²",
+      "60cm²",
+      "64cm²"
+    ],
+    "correct_answer": 2,
+    "explanation": "겉넓이는 $2(2\\times3+3\\times4+4\\times2)=2(6+12+8)=52$cm²입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_007",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "4단원. 통계",
+    "difficulty": "medium",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "어떤 자료의 값 1, 2, 3, 4의 도수가 각각 2, 5, 7, 6일 때 자료의 전체 도수는?",
+    "options": [
+      "18",
+      "19",
+      "20",
+      "21",
+      "22"
+    ],
+    "correct_answer": 3,
+    "explanation": "전체 도수는 각 값의 도수를 모두 더한 것이므로 $2+5+7+6=20$입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_008",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "5단원. 규칙과 비례",
+    "difficulty": "hard",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "정비례 관계 $y=0.75x$에서 $x=12$일 때 $y$의 값은?",
+    "options": [
+      "6",
+      "8",
+      "9",
+      "10",
+      "12"
+    ],
+    "correct_answer": 3,
+    "explanation": "$y=0.75\\times12=9$이므로 $y$의 값은 9입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_009",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "3단원. 입체도형",
+    "difficulty": "hard",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "밑면의 반지름이 3cm이고 높이가 4cm인 원뿔의 부피는?",
+    "options": [
+      "$4\\pi$cm³",
+      "$12\\pi$cm³",
+      "$18\\pi$cm³",
+      "$24\\pi$cm³",
+      "$36\\pi$cm³"
+    ],
+    "correct_answer": 2,
+    "explanation": "원뿔의 부피는 $\\frac{1}{3}\\pi r^2h$이므로 $\\frac{1}{3}\\pi\\times9\\times4=12\\pi$cm³입니다."
+  },
+  {
+    "question_id": "PILOT_G1_MATH_010",
+    "grade": 1,
+    "subject": "수학",
+    "chapter": "5단원. 규칙과 비례",
+    "difficulty": "hard",
+    "origin": "generated",
+    "review_status": "pending",
+    "source_url": null,
+    "source_license": null,
+    "question_text": "$x:y=2:5$이고 $x+y=28$일 때 $y$의 값은?",
+    "options": [
+      "12",
+      "14",
+      "16",
+      "20",
+      "24"
+    ],
+    "correct_answer": 4,
+    "explanation": "$x+y$는 비의 합 7에 해당하므로 1에 해당하는 값은 4입니다. 따라서 $y=5\\times4=20$입니다."
   }
 ]

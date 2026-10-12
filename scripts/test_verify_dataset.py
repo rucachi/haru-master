@@ -18,9 +18,9 @@ print(f"Nakyung total: {len(nak)} (국어: {len(nak_kor)}, 영어: {len(nak_eng)
 print(f"Chahye total:   {len(cha)} (국어: {len(cha_kor)}, 영어: {len(cha_eng)})")
 print(f"All questions: {len(all_q)}")
 
-assert len(nak) == 580, f"Nakyung expected 580, got {len(nak)}"
-assert len(cha) == 480, f"Chahye expected 480, got {len(cha)}"
-assert len(all_q) == 1060, f"All questions expected 1060, got {len(all_q)}"
+assert len(nak) == 590, f"Nakyung expected 590, got {len(nak)}"
+assert len(cha) == 490, f"Chahye expected 490, got {len(cha)}"
+assert len(all_q) == 1080, f"All questions expected 1080, got {len(all_q)}"
 
 assert len(nak_kor) == 90, f"Nakyung Kor expected 90, got {len(nak_kor)}"
 assert len(nak_eng) == 90, f"Nakyung Eng expected 90, got {len(nak_eng)}"
@@ -34,4 +34,4 @@ for idx, q in enumerate(all_q):
     assert 1 <= q["correct_answer"] <= 5, f"Invalid correct_answer in {q['question_id']}"
     assert "explanation" in q and len(q["explanation"].strip()) > 0, f"Empty explanation in {q['question_id']}"
 
-print(">>> ALL 1,060 QUESTIONS STRICTLY VALIDATED WITH 0 DEFECTS! <<<")
+print(">>> ALL 1,080 QUESTIONS STRICTLY VALIDATED WITH 0 STRUCTURAL DEFECTS! <<<")
