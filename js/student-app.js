@@ -510,20 +510,29 @@ class StudentApp {
         ...bankPool.filter(q => q.subject === sub && !seenQids.has(q.question_id))
       ];
 
-      // 국어/영어의 경우 독해(Passage가 있는) 문제를 우선 정렬
+      // ★ [필수 요구사항] 국어와 영어는 최소 1문항 이상의 긴 문단 독해 문제(Passage >= 80자)를 100% 반드시 포함!
       if (sub === "국어" || sub === "영어") {
-        subCandidates.sort((a, b) => {
-          const aHasPassage = (a.passage && a.passage.trim().length > 0) ? 1 : 0;
-          const bHasPassage = (b.passage && b.passage.trim().length > 0) ? 1 : 0;
-          return bHasPassage - aHasPassage;
-        });
+        const longPassagePool = subCandidates.filter(q => q.passage && q.passage.trim().length >= 80 && !seenQids.has(q.question_id));
+        if (longPassagePool.length > 0) {
+          // 일일 시드로 독해 풀 셔플 후 최우선 확정 선발
+          this.shuffleArrayWithSeed(longPassagePool, baseSeed + sIdx * 89);
+          const mandatoryPassageQ = longPassagePool[0];
+          subChosen.push(mandatoryPassageQ);
+          seenQids.add(mandatoryPassageQ.question_id);
+          subCandidates = subCandidates.filter(q => q.question_id !== mandatoryPassageQ.question_id);
+        } else {
+          // 풀에 긴 지문이 없는 예외 상황 발생 시에도 동적 긴 지문 독해 생성기로 1문제 무조건 확보
+          const dynamicPassageQ = this.generateDynamicQuestion(grade, sub, 1);
+          subChosen.push(dynamicPassageQ);
+          seenQids.add(dynamicPassageQ.question_id);
+        }
       }
 
-      // 최신 업데이트 문제 중심 배치:
+      // (3) 최신 업데이트 문제 중심 배치:
       // 문제 풀의 후반부(최신 단원/최신 생성 문항)에 65% 가중치 부여
       const remainingQuota = quota - subChosen.length;
       if (remainingQuota > 0 && subCandidates.length > 0) {
-        // 후보군을 최신순(인덱스 역순 또는 ID 역순)으로 정렬
+        // 후보군을 최신순(인덱스 역순)으로 정렬
         const sortedCandidates = [...subCandidates].reverse();
         
         // 최신 풀(상위 60%)과 기본 풀(하위 40%) 분할
@@ -674,6 +683,90 @@ class StudentApp {
           explanation: `$${coef}x = ${rhs} - ${constant} = ${coef * x}$ 이므로 $x = ${x}$ 입니다.`
         };
       }
+    }
+
+    if (sub === "국어") {
+      const korPassages = [
+        {
+          passage: "인공지능(AI) 기술이 비약적으로 발전하면서 의료, 금융, 예술 등 다양한 분야에서 혁신이 이루어지고 있다. 그러나 기술의 발전 이면에는 알고리즘 편향성, 개인정보 침해, 창작물의 저작권 귀속 문제 등 해결해야 할 윤리적 과제가 산적해 있다. 기술은 인간의 삶을 풍요롭게 만드는 도구여야 하며, 이를 올바르게 통제하고 공정성을 담보할 수 있는 사회적 합의와 규범 마련이 시급하다.",
+          q: "윗글의 중심 내용(주제)으로 가장 적절한 것은?",
+          opts: [
+            "인공지능의 산업적 이점과 경제적 가치",
+            "인공지능 기술 발전에 따른 윤리적 과제와 사회적 합의의 필요성",
+            "의료 분야에서 인공지능 알고리즘의 한계",
+            "예술 창작에서 저작권 침해 사례와 처벌 기준",
+            "개인정보 보호를 위한 최신 암호화 기술"
+          ],
+          ans: 2,
+          exp: "지문은 인공지능 기술의 발전과 함께 대두되는 윤리적 과제들을 지적하고, 이를 해결하기 위한 사회적 합의의 필요성을 강조하고 있습니다."
+        },
+        {
+          passage: "독서는 단순히 문자를 읽고 정보를 습득하는 수동적 행위가 아니다. 독자는 자신이 지닌 배경지식과 경험을 바탕으로 글쓴이가 숨겨둔 맥락을 추론하고, 제시된 주장의 타당성을 비판적으로 검토하며 새로운 의미를 능동적으로 재구성한다. 따라서 깊이 있는 독서를 위해서는 글의 표면적 의미에 머무르지 않고, 행간에 담긴 의도를 탐색하는 주체적 태도가 요구된다.",
+          q: "윗글을 바탕으로 추론할 수 있는 바람직한 독서 태도는?",
+          opts: [
+            "글쓴이의 주장을 의심 없이 그대로 수용한다.",
+            "배경지식의 개입을 배제하고 글자 자체에만 집중한다.",
+            "자신의 지식과 경험을 활용하여 비판적·능동적으로 의미를 재구성한다.",
+            "빠른 속도로 많은 양의 책을 다독하는 데 초점을 맞춘다.",
+            "작가의 의도보다는 문장의 문법적 오류를 찾는 데 집중한다."
+          ],
+          ans: 3,
+          exp: "지문은 독서를 수동적 수용이 아닌, 배경지식과 경험을 바탕으로 능동적·비판적으로 의미를 재구성하는 과정이라고 설명하고 있습니다."
+        }
+      ];
+      const pData = korPassages[seedNum % korPassages.length];
+      return {
+        question_id: `DYN_G${grade}_KOR_READING_${Date.now()}_${seedNum}`,
+        grade,
+        subject: "국어",
+        passage: pData.passage,
+        question_text: pData.q,
+        options: pData.opts,
+        correct_answer: pData.ans,
+        explanation: pData.exp
+      };
+    }
+
+    if (sub === "영어") {
+      const engPassages = [
+        {
+          passage: "Many scientists believe that sleep plays a crucial role in memory consolidation. When we sleep, our brain actively processes and organizes the information learned throughout the day. Without sufficient rest, neural connections become weakened, making it significantly harder to recall facts and concentrate on complex tasks. Therefore, maintaining consistent sleep habits is just as vital for academic success as studying diligently.",
+          q: "What is the main topic of the passage above?",
+          opts: [
+            "The chemical composition of human brain cells",
+            "The essential role of sleep in memory and learning",
+            "Different types of dreams during deep sleep",
+            "Effective methods to study for final exams",
+            "How to reduce stress through physical exercise"
+          ],
+          ans: 2,
+          exp: "지문은 수면이 기억 정리와 학습에 미치는 결정적 중요성을 다루고 있습니다. (The essential role of sleep in memory and learning)"
+        },
+        {
+          passage: "Climate change is one of the most pressing challenges of our era. Rising global temperatures have led to extreme weather events, shrinking polar ice caps, and unprecedented biodiversity loss. To tackle this crisis, international cooperation is essential, along with transition toward renewable energy sources like solar and wind power. Every small eco-friendly choice made by individuals also contributes to a sustainable future.",
+          q: "According to the passage, which action is NOT suggested to address climate change?",
+          opts: [
+            "Global international cooperation",
+            "Transitioning to solar and wind energy",
+            "Individual eco-friendly lifestyle choices",
+            "Increasing reliance on fossil fuels",
+            "Protecting global biodiversity"
+          ],
+          ans: 4,
+          exp: "기후 위기 해결책으로 재생 에너지 전환, 국제 협력, 개인의 친환경 실천이 제시되었으며, 화석 연료 의존도 증가는 해결책과 정반대입니다."
+        }
+      ];
+      const pData = engPassages[seedNum % engPassages.length];
+      return {
+        question_id: `DYN_G${grade}_ENG_READING_${Date.now()}_${seedNum}`,
+        grade,
+        subject: "영어",
+        passage: pData.passage,
+        question_text: pData.q,
+        options: pData.opts,
+        correct_answer: pData.ans,
+        explanation: pData.exp
+      };
     }
 
     // 기본 대체 문항
