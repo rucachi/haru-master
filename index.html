@@ -463,11 +463,24 @@
          ========================================================================= -->
     <section class="tab-pane" id="tab-batch">
       <div class="batch-tools-grid">
+        <div class="glass-card" style="border-color: rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.05);">
+          <div class="card-header-row">
+            <h2 class="card-title"><span>🚀</span> 2학기 개학 진도 860문항 원클릭 탑재</h2>
+            <span class="badge-count" style="background: var(--student-primary);">860문항 풀세트</span>
+          </div>
+          <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 1rem; line-height: 1.6;">
+            9월 3일 개학 후 10월 중순까지의 진도에 맞춰 생성된 <strong>나경이 480문항 + 차혜 380문항 (총 860문항)</strong>을 원클릭으로 즉시 탑재하고 Firebase Cloud Firestore에 일괄 동기화합니다. (기하/실험 SVG 다이어그램 포함)
+          </p>
+          <button type="button" class="btn btn-primary" id="btn-load-curriculum-860" style="width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700;">
+            <span>⚡</span> 2학기 860문항 즉시 로드 & Firebase 클라우드 동기화
+          </button>
+        </div>
+
         <div class="glass-card">
           <h2 class="card-title" style="margin-bottom: 1rem;"><span>📂</span> JSON 파일 일괄 드래그 & 드롭</h2>
           <div class="dropzone-box" id="json-dropzone">
             <div class="dropzone-icon">📥</div>
-            <div style="font-weight: 700; margin-bottom: 6px;">sample_assignments.json 파일을 여기에 끌어다 놓으세요</div>
+            <div style="font-weight: 700; margin-bottom: 6px;">all_curriculum_questions_860.json 또는 JSON 파일을 여기에 끌어다 놓으세요</div>
             <div style="font-size: 0.82rem; color: var(--text-dim);">클릭하여 파일 선택 가능 (.json)</div>
             <input type="file" id="json-file-input" accept=".json" style="display: none;">
           </div>

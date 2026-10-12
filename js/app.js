@@ -1130,18 +1130,43 @@ function initBatchTools() {
       handleBatchFile(e.target.files[0]);
     }
   };
+
+  // 2학기 860문항 원클릭 탑재 & Firebase 동기화 버튼
+  const btn860 = document.getElementById("btn-load-curriculum-860");
+  if (btn860) {
+    btn860.addEventListener("click", async () => {
+      btn860.disabled = true;
+      const originalText = btn860.innerHTML;
+      btn860.innerHTML = `<span>⏳</span> 860문항 탑재 및 Firebase 동기화 진행 중...`;
+      try {
+        const count = await dbService.loadCurriculum860();
+        if (count) {
+          showToast(`🎉 2학기 개학 진도 860문항 탑재 완료! (Firebase 클라우드 연동됨)`, "success");
+          renderAllViews();
+        } else {
+          showToast("문항 데이터 로드에 실패했습니다.", "error");
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("동기화 중 오류가 발생했습니다.", "error");
+      } finally {
+        btn860.disabled = false;
+        btn860.innerHTML = originalText;
+      }
+    });
+  }
 }
 
-function handleBatchFile(file) {
+async function handleBatchFile(file) {
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     const text = e.target.result;
-    const ok = dbService.importJSON(text);
-    if (ok) {
-      showToast(`'${file.name}' 데이터가 성공적으로 일괄 반영되었습니다!`, "success");
+    const count = await dbService.importJSON(text);
+    if (count) {
+      showToast(`'${file.name}' (${count}개 문항) 데이터가 성공적으로 반영 및 클라우드 동기화되었습니다!`, "success");
       renderAllViews();
     } else {
-      showToast("JSON 파일 형식이 맞지 않습니다. sample_assignments.json 양식을 확인하세요.", "error");
+      showToast("JSON 파일 형식이 맞지 않습니다. JSON 구조를 확인하세요.", "error");
     }
   };
   reader.readAsText(file, "utf-8");

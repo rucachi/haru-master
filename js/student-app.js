@@ -395,7 +395,26 @@ class StudentApp {
     });
 
     // 2. DB에 등록된 정규 문항 수집
-    const allDbQuestions = await dbService.getAllQuestions();
+    let allDbQuestions = await dbService.getAllQuestions();
+    let gradeDbCount = allDbQuestions.filter(q => q.grade === grade).length;
+
+    // 만약 현재 학년의 DB 문항이 아직 충분치 않다면, 생성된 2학기 전용 데이터셋(480/380) 자동 로드
+    if (gradeDbCount < 40) {
+      try {
+        const file = (grade === 3) 
+          ? "study_data/nakyeong/nakyung_questions_480.json" 
+          : "study_data/chahye/chahye_questions_380.json";
+        const res = await fetch(file);
+        if (res.ok) {
+          const list = await res.json();
+          await dbService.importJSON(JSON.stringify(list));
+          allDbQuestions = await dbService.getAllQuestions();
+        }
+      } catch (err) {
+        console.warn("로컬 커리큘럼 데이터 프리로드 건너뜀:", err);
+      }
+    }
+
     const candidateDbPool = allDbQuestions.filter(q => {
       if (q.grade !== grade) return false;
       if (subFilter !== "ALL" && q.subject !== subFilter) return false;

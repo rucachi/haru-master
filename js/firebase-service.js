@@ -481,10 +481,20 @@ export class HaruMasterDB {
     return JSON.stringify(this.data, null, 2);
   }
 
-  importJSON(jsonString) {
+  async importJSON(jsonString) {
     try {
       const parsed = JSON.parse(jsonString);
-      if (parsed.assignments && Array.isArray(parsed.assignments)) {
+      let count = 0;
+
+      if (Array.isArray(parsed)) {
+        // [ { question_id, grade, subject, ... }, ... ] 형태
+        parsed.forEach(q => {
+          if (q.question_id) {
+            this.data.questions[q.question_id] = q;
+            count++;
+          }
+        });
+      } else if (parsed.assignments && Array.isArray(parsed.assignments)) {
         // sample_assignments.json 원본 스키마 호환 파싱
         parsed.assignments.forEach(assignItem => {
           const date = assignItem.assignment_date;
@@ -494,6 +504,7 @@ export class HaruMasterDB {
             assignItem.questions.forEach(q => {
               this.data.questions[q.question_id] = q;
               qids.push(q.question_id);
+              count++;
             });
           }
           const assignId = `${date}_G${grade}`;
@@ -505,13 +516,63 @@ export class HaruMasterDB {
             total_questions: qids.length
           };
         });
-      } else if (parsed.questions && parsed.assignments) {
-        this.data = parsed;
+      } else if (parsed.questions) {
+        if (Array.isArray(parsed.questions)) {
+          parsed.questions.forEach(q => {
+            if (q.question_id) {
+              this.data.questions[q.question_id] = q;
+              count++;
+            }
+          });
+        } else {
+          Object.entries(parsed.questions).forEach(([qid, q]) => {
+            this.data.questions[qid] = q;
+            count++;
+          });
+        }
+        if (parsed.assignments) this.data.assignments = parsed.assignments;
       }
+
       this.saveLocalData();
-      return true;
+
+      // Cloud Firestore에 즉시 일괄 비동기 반영
+      if (this.db && fbSetDoc && fbDoc) {
+        this.syncQuestionsToRemoteFirestore();
+      }
+
+      return count;
     } catch (e) {
       console.error("JSON 가져오기 오류:", e);
+      return false;
+    }
+  }
+
+  async syncQuestionsToRemoteFirestore() {
+    if (!this.db || !fbSetDoc || !fbDoc) return;
+    try {
+      const qEntries = Object.entries(this.data.questions);
+      console.log(`🔥 [Cloud Firestore] ${qEntries.length}개 문항 클라우드 동기화 시작...`);
+      for (const [qid, q] of qEntries) {
+        await fbSetDoc(fbDoc(this.db, "Questions", qid), q, { merge: true });
+      }
+      console.log(`✅ [Cloud Firestore] 문항 클라우드 동기화 완료!`);
+    } catch (err) {
+      console.warn("원격 Firestore 동기화 중 오류 (로컬 보존됨):", err);
+    }
+  }
+
+  /**
+   * 9월 3일 개학 진도 반영 860문항 (나경 480 / 차혜 380) 원클릭 로드 및 동기화
+   */
+  async loadCurriculum860() {
+    try {
+      const res = await fetch("study_data/all_curriculum_questions_860.json");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const list = await res.json();
+      const count = await this.importJSON(JSON.stringify(list));
+      return count;
+    } catch (err) {
+      console.error("860문항 로드 실패:", err);
       return false;
     }
   }
