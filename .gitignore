@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+env/
+venv/
+
+# Firebase & Sensitive credentials
+serviceAccountKey.json
+*.key
+google-services.json
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Android
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+local.properties

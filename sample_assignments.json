@@ -1,0 +1,230 @@
+{
+  "assignments": [
+    {
+      "assignment_date": "20261013",
+      "target_grade": 1,
+      "questions": [
+        {
+          "question_id": "M1_KOR_001",
+          "grade": 1,
+          "subject": "국어",
+          "passage": "동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리나라 만세. 무궁화 삼천리 화려강산 대한사람 대한으로 길이 보전하세. 가을 하늘 공활한데 높고 구름 없이 밝은 달은 우리 가슴 일편단심일세.",
+          "question_text": "위 글의 중심 정서로 가장 알맞은 것은?",
+          "options": ["나라를 사랑하는 마음", "자연의 무상함", "이별의 슬픔", "계절의 변화에 대한 아쉬움", "새로운 학업에 대한 기대"],
+          "correct_answer": 1,
+          "explanation": "조국에 대한 애정과 번영을 염원하는 애국심을 노래하고 있습니다."
+        },
+        {
+          "question_id": "M1_MATH_001",
+          "grade": 1,
+          "subject": "수학",
+          "question_text": "다음 일차방정식 $2x + 6 = 14$ 를 만족하는 $x$의 값을 구하시오.",
+          "options": ["$x = 2$", "$x = 3$", "$x = 4$", "$x = 5$", "$x = 6$"],
+          "correct_answer": 3,
+          "explanation": "$2x = 14 - 6 = 8$ 이므로 $x = 4$ 입니다."
+        },
+        {
+          "question_id": "M1_ENG_001",
+          "grade": 1,
+          "subject": "영어",
+          "passage": "Tom is a middle school student. He loves playing soccer with his friends after school. Yesterday, he scored two goals in the final match.",
+          "question_text": "What did Tom do yesterday?",
+          "options": [
+            "He bought a new soccer ball.",
+            "He scored two goals in the match.",
+            "He watched a movie with his family.",
+            "He studied English at the library.",
+            "He stayed home because of the rain."
+          ],
+          "correct_answer": 2,
+          "explanation": "본문의 'Yesterday, he scored two goals in the final match.'에서 정답을 찾을 수 있습니다."
+        },
+        {
+          "question_id": "M1_INVALID_001",
+          "grade": 1,
+          "subject": "음악",
+          "question_text": "다음 중 높은음자리표의 계이름 '솔'의 위치는?",
+          "options": ["첫째 줄", "둘째 줄", "셋째 줄", "넷째 줄", "다섯째 줄"],
+          "correct_answer": 2,
+          "explanation": "음악 과목 검증 테스트용 문항입니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261013",
+      "target_grade": 3,
+      "questions": [
+        {
+          "question_id": "M3_MATH_001",
+          "grade": 3,
+          "subject": "수학",
+          "question_text": "이차방정식 $x^2 - 5x + 6 = 0$ 의 두 근 $\\alpha, \\beta$에 대하여 $\\alpha + \\beta$의 값은?",
+          "options": ["$-6$", "$-5$", "$1$", "$5$", "$6$"],
+          "correct_answer": 4,
+          "explanation": "근과 계수의 관계에 의해 $\\alpha + \\beta = -(-5)/1 = 5$ 입니다."
+        },
+        {
+          "question_id": "M3_SCI_001",
+          "grade": 3,
+          "subject": "과학",
+          "question_text": "멘델의 유전 원리 중 잡종 1대에서 우성 형질만 나타나는 원리는?",
+          "options": ["우열의 원리", "분리의 법칙", "독립의 법칙", "연관의 법칙", "중간유전"],
+          "correct_answer": 1,
+          "explanation": "대립 형질을 가진 순종 개체끼리 교배했을 때 잡종 1대에서 우성만 발현되는 것은 우열의 원리입니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261014",
+      "target_grade": 1,
+      "questions": [
+        {
+          "question_id": "M1_SOC_001",
+          "grade": 1,
+          "subject": "사회",
+          "question_text": "적도 부근에 위치하여 연중 기온이 높고 강수량이 많은 기후는?",
+          "options": ["열대 우림 기후", "사막 기후", "온대 기후", "냉대 기후", "한대 기후"],
+          "correct_answer": 1,
+          "explanation": "적도 수렴대에 위치한 열대 우림 기후는 연중 고온다우합니다."
+        },
+        {
+          "question_id": "M1_SCI_001",
+          "grade": 1,
+          "subject": "과학",
+          "question_text": "빛이 서로 다른 매질의 경계면을 지나면서 꺾이는 현상을 무엇이라고 하는가?",
+          "options": ["반사", "굴절", "분산", "간섭", "회절"],
+          "correct_answer": 2,
+          "explanation": "매질의 속도 차이로 인해 진행 방향이 바뀌는 현상은 굴절입니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261014",
+      "target_grade": 3,
+      "questions": [
+        {
+          "question_id": "M3_HIST_001",
+          "grade": 3,
+          "subject": "역사",
+          "question_text": "1919년 일제의 무단통치에 맞서 일어난 거족적인 민족 독립운동은?",
+          "options": ["3·1 운동", "6·10 만세운동", "광주학생항일운동", "동학농민운동", "갑신정변"],
+          "correct_answer": 1,
+          "explanation": "1919년 3월 1일 일어난 3·1 운동은 일제 식민통치 방식을 문화통치로 바꾸는 계기가 되었습니다."
+        },
+        {
+          "question_id": "M3_MATH_002",
+          "grade": 3,
+          "subject": "수학",
+          "question_text": "직각삼각형에서 빗변의 길이가 $c$이고 나머지 두 변이 각각 $a, b$일 때 피타고라스 정리 성립 식은?",
+          "options": [
+            "$a + b = c$",
+            "$a^2 + b^2 = c^2$",
+            "$\\sqrt{a} + \\sqrt{b} = \\sqrt{c}$",
+            "$a^2 - b^2 = c^2$",
+            "$a \\times b = c^2$"
+          ],
+          "correct_answer": 2,
+          "explanation": "직각삼각형의 빗변 제곱은 다른 두 변의 제곱의 합과 같습니다 ($a^2 + b^2 = c^2$)."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261015",
+      "target_grade": 1,
+      "questions": [
+        {
+          "question_id": "M1_MATH_002",
+          "grade": 1,
+          "subject": "수학",
+          "question_text": "좌표평면 위의 점 $P(-3, 4)$는 제 몇 사분면의 점인가?",
+          "options": ["제 1사분면", "제 2사분면", "제 3사분면", "제 4사분면", "축 위의 점"],
+          "correct_answer": 2,
+          "explanation": "$x < 0, y > 0$ 인 영역은 제 2사분면입니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261015",
+      "target_grade": 3,
+      "questions": [
+        {
+          "question_id": "M3_ENG_001",
+          "grade": 3,
+          "subject": "영어",
+          "passage": "Artificial intelligence is rapidly changing education. Students can now receive personalized learning materials tailored to their own learning speed and weakness.",
+          "question_text": "According to the passage, how is AI helping students?",
+          "options": [
+            "By replacing all human teachers.",
+            "By offering customized study materials based on their speed and weaknesses.",
+            "By shortening school vacations.",
+            "By eliminating examinations completely.",
+            "By lowering tablet device prices."
+          ],
+          "correct_answer": 2,
+          "explanation": "'tailored to their own learning speed and weakness' 부분에서 개인 맞춤형 학습을 제공함을 알 수 있습니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261016",
+      "target_grade": 1,
+      "questions": [
+        {
+          "question_id": "M1_HIST_001",
+          "grade": 1,
+          "subject": "역사",
+          "question_text": "우리나라 최초의 고대 국가로 단군왕검에 의해 건국된 나라는?",
+          "options": ["고구려", "백제", "신라", "고조선", "부여"],
+          "correct_answer": 4,
+          "explanation": "청동기 문화를 바탕으로 성립된 우리나라 최초의 국가는 고조선입니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261016",
+      "target_grade": 3,
+      "questions": [
+        {
+          "question_id": "M3_SOC_001",
+          "grade": 3,
+          "subject": "사회",
+          "question_text": "수요와 공급 법칙에 따라 수요량이 공급량보다 많을 때 일어나는 가격의 변화는?",
+          "options": ["가격 상승", "가격 하락", "가격 불변", "거래량 감소", "정부 통제"],
+          "correct_answer": 1,
+          "explanation": "초과 수요 상태에서는 가격이 상승합니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261017",
+      "target_grade": 1,
+      "questions": [
+        {
+          "question_id": "M1_KOR_002",
+          "grade": 1,
+          "subject": "국어",
+          "passage": "바람이 불어오는 곳 그곳으로 가네. 그대의 머릿결 같은 나무 아래로.",
+          "question_text": "위 시구에서 '그대의 머릿결 같은'에 쓰인 표현 방법은?",
+          "options": ["직유법", "은유법", "의인법", "도치법", "반어법"],
+          "correct_answer": 1,
+          "explanation": "'~같은' 연결어를 사용하여 직접 빗대어 표현한 직유법입니다."
+        }
+      ]
+    },
+    {
+      "assignment_date": "20261017",
+      "target_grade": 3,
+      "questions": [
+        {
+          "question_id": "M3_MATH_003",
+          "grade": 3,
+          "subject": "수학",
+          "question_text": "무리수 $\\sqrt{18}$을 $a\\sqrt{b}$의 꼴로 가장 간단히 나타낸 것은? (단, $b$는 가장 작은 자연수)",
+          "options": ["$2\\sqrt{3}$", "$3\\sqrt{2}$", "$9\\sqrt{2}$", "$2\\sqrt{9}$", "$6\\sqrt{3}$"],
+          "correct_answer": 2,
+          "explanation": "$\\sqrt{18} = \\sqrt{9 \\times 2} = 3\\sqrt{2}$ 입니다."
+        }
+      ]
+    }
+  ]
+}
