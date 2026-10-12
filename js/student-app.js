@@ -324,6 +324,7 @@ class StudentApp {
     this.solvedCount = 0;
     this.correctCount = 0;
     this.sessionWrongQuestions = []; // 이번 세션에서 틀린 문제 저장
+    this.loadRequestId = 0;
     this.init();
   }
 
@@ -347,10 +348,18 @@ class StudentApp {
 
         const cheerBanner = document.createElement("div");
         cheerBanner.className = "dad-cheer-banner";
-        cheerBanner.innerHTML = `
-          <span>💌 <strong>아빠의 응원:</strong> "${data.message}"</span>
-          <button type="button" class="btn-close-cheer" onclick="this.parentElement.remove()">✕</button>
-        `;
+        const message = document.createElement("span");
+        message.append("💌 ");
+        const label = document.createElement("strong");
+        label.textContent = "아빠의 응원: ";
+        message.append(label, `"${data.message}"`);
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "btn-close-cheer";
+        closeButton.title = "응원 메시지 닫기";
+        closeButton.textContent = "✕";
+        closeButton.addEventListener("click", () => cheerBanner.remove());
+        cheerBanner.append(message, closeButton);
         document.querySelector(".student-header")?.insertAdjacentElement("afterend", cheerBanner);
       }
     } catch (e) {}
@@ -386,6 +395,7 @@ class StudentApp {
    * @param {boolean} isMoreStudy '더 공부하기' 버튼 여부 (오답 문항 1순위 강제 포함)
    */
   async loadQuestions(isMoreStudy = false) {
+    const requestId = ++this.loadRequestId;
     const compEl = document.getElementById("completion-screen");
     const gridEl = document.getElementById("study-workspace-grid");
     if (compEl) compEl.style.display = "none";
@@ -410,6 +420,7 @@ class StudentApp {
 
     // (2) Firebase SRS 복습 문항 중 오답 이력이 있는 문항
     const studentReviews = await dbService.getStudentReviews(this.config.id);
+    if (requestId !== this.loadRequestId) return;
     const dueOrWrongs = studentReviews.filter(r => (r.wrongCount > 0 || !r.last_is_correct));
     dueOrWrongs.forEach(r => {
       if (r.question && !seenQids.has(r.question_id)) {
@@ -433,6 +444,7 @@ class StudentApp {
         const res = await fetch(file);
         if (res.ok) {
           const list = await res.json();
+          if (requestId !== this.loadRequestId) return;
           await dbService.importJSON(JSON.stringify(list));
           allDbQuestions = await dbService.getAllQuestions();
         }
@@ -576,6 +588,8 @@ class StudentApp {
 
     this.questions = finalQuestions;
     this.isGraded = false;
+
+    if (requestId !== this.loadRequestId) return;
 
     // 오늘 학습 진행 상태(몇 번째 문제까지 풀었는지) 안전 복원
     const progressKey = `harumaster_prog_${this.config.id}_${todayStr}_${subFilter}`;
@@ -941,9 +955,6 @@ class StudentApp {
       this.sessionWrongQuestions.push(q);
     }
 
-    // Firebase Cloud Firestore 실시간 채점 기록
-    await dbService.submitAnswer(this.config.id, q.question_id, this.selectedAnswer);
-
     // 보기 하이라이트
     document.querySelectorAll(".opt-card-btn").forEach(btn => {
       btn.disabled = true;
@@ -990,6 +1001,19 @@ class StudentApp {
     }
 
     this.updateProgress();
+
+    // 채점 화면은 저장 서버 상태와 분리해 즉시 표시한다.
+    try {
+      // 내장/동적 문항도 SRS 기록 대상이 되도록 먼저 로컬 DB에 등록한다.
+      const storedQuestion = await dbService.getQuestion(q.question_id);
+      if (!storedQuestion) {
+        await dbService.saveQuestion(q);
+      }
+      await dbService.submitAnswer(this.config.id, q.question_id, this.selectedAnswer);
+    } catch (error) {
+      console.warn("답안 저장 실패 (화면 채점은 완료됨):", error);
+      this.showToast("채점은 완료됐지만 학습 기록 저장에 실패했습니다. 잠시 후 다시 동기화해 주세요.", "error");
+    }
   }
 
   nextQuestion() {
@@ -1136,16 +1160,32 @@ class StudentApp {
 
   renderMath(text) {
     if (!text) return "";
+    const source = String(text);
+    const escapeHtml = (value) => value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
     if (typeof window.katex === "undefined") {
-      return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      return escapeHtml(source);
     }
-    return text.replace(/\$([^$]+)\$/g, (match, formula) => {
+
+    const mathPattern = /\$([^$]+)\$/g;
+    let output = "";
+    let lastIndex = 0;
+    let match;
+    while ((match = mathPattern.exec(source)) !== null) {
+      output += escapeHtml(source.slice(lastIndex, match.index));
       try {
-        return window.katex.renderToString(formula, { throwOnError: false });
+        output += window.katex.renderToString(match[1], { throwOnError: false });
       } catch (e) {
-        return formula;
+        output += escapeHtml(match[0]);
       }
-    });
+      lastIndex = mathPattern.lastIndex;
+    }
+    return output + escapeHtml(source.slice(lastIndex));
   }
 
   shuffleArray(array) {
@@ -1195,6 +1235,7 @@ class StudentApp {
 
     const ctx = canvas.getContext("2d");
     let isDrawing = false;
+    let activePointerId = null;
     let currentColor = "#ffffff";
     let currentWidth = 4;
     let isEraserMode = false;
@@ -1298,7 +1339,11 @@ class StudentApp {
 
     // S-Pen 및 터치 드로잉 이벤트 리스너
     canvas.addEventListener("pointerdown", (e) => {
+      if (isDrawing || e.pointerType !== "pen") return;
+      e.preventDefault();
       isDrawing = true;
+      activePointerId = e.pointerId;
+      canvas.setPointerCapture(e.pointerId);
       const pos = getPos(e);
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
@@ -1310,22 +1355,25 @@ class StudentApp {
     });
 
     canvas.addEventListener("pointermove", (e) => {
-      if (!isDrawing) return;
+      if (!isDrawing || e.pointerId !== activePointerId) return;
+      e.preventDefault();
       const pos = getPos(e);
       ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
     });
 
-    const stopDrawing = () => {
-      if (isDrawing) {
-        ctx.closePath();
-        isDrawing = false;
+    const stopDrawing = (e) => {
+      if (!isDrawing || (e && e.pointerId !== activePointerId)) return;
+      ctx.closePath();
+      if (e && canvas.hasPointerCapture(e.pointerId)) {
+        canvas.releasePointerCapture(e.pointerId);
       }
+      activePointerId = null;
+      isDrawing = false;
     };
 
     canvas.addEventListener("pointerup", stopDrawing);
     canvas.addEventListener("pointercancel", stopDrawing);
-    canvas.addEventListener("pointerleave", stopDrawing);
   }
 
   triggerConfetti() {

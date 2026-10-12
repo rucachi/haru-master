@@ -379,6 +379,19 @@ export class HaruMasterDB {
 
   // --- SRS 복습 & 학생 통계 ---
   async getStudentReviews(studentId) {
+    if (this.db && fbGetDocs && fbCollection) {
+      try {
+        const reviewSnap = await fbGetDocs(fbCollection(this.db, "Users", studentId, "Reviews"));
+        if (!this.data.reviews[studentId]) this.data.reviews[studentId] = {};
+        reviewSnap.forEach(docSnap => {
+          this.data.reviews[studentId][docSnap.id] = docSnap.data();
+        });
+        this.saveLocalData();
+      } catch (error) {
+        console.warn("원격 SRS 복습 데이터 조회 실패 (로컬 데이터 사용):", error);
+      }
+    }
+
     const studentReviews = this.data.reviews[studentId] || {};
     const result = [];
     for (const [qid, srsInfo] of Object.entries(studentReviews)) {

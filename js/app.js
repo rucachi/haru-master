@@ -46,7 +46,7 @@ class DadMonitoringApp {
         const btn = e.currentTarget;
         btn.classList.add("active");
         this.horizon = btn.dataset.horizon || "daily";
-        this.renderChartsAndKPIs();
+        this.loadAndRenderDashboard();
       });
     });
 
@@ -110,9 +110,77 @@ class DadMonitoringApp {
       lastSyncEl.innerText = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} 동기화 완료`;
     }
 
+    this.dashboardData = await this.getLiveStudentData();
     this.renderChartsAndKPIs();
     this.renderAIInsightReport();
     this.renderSRSStagesAndWrongs();
+  }
+
+  async getLiveStudentData() {
+    const isNakyung = this.student === "nakyung";
+    const grade = isNakyung ? 3 : 1;
+    const studentName = isNakyung ? "나경이" : "차혜";
+    const subjects = isNakyung
+      ? ["수학", "과학", "사회", "역사", "영어", "국어"]
+      : ["수학", "과학", "사회", "영어", "국어"];
+    const totalBank = isNakyung ? 480 : 380;
+    const targetCount = isNakyung ? 25 : 22;
+    const reviews = await dbService.getStudentReviews(this.student);
+    const now = new Date();
+    const cutoff = new Date(now);
+    if (this.horizon === "daily") cutoff.setHours(0, 0, 0, 0);
+    else if (this.horizon === "weekly") cutoff.setDate(now.getDate() - 6);
+    else cutoff.setDate(now.getDate() - 29);
+
+    const solved = reviews.filter(review => {
+      const solvedAt = new Date(review.last_solved_at || 0);
+      return solvedAt >= cutoff && solvedAt <= now;
+    });
+    const subjectsData = subjects.map(name => {
+      const subjectReviews = solved.filter(review => review.question?.subject === name);
+      const correct = subjectReviews.filter(review => review.last_is_correct).length;
+      const wrong = subjectReviews.length - correct;
+      return {
+        name,
+        correct,
+        wrong,
+        rate: subjectReviews.length ? Math.round((correct / subjectReviews.length) * 100) : 0
+      };
+    });
+
+    const solvedCount = solved.length;
+    const correctCount = solved.filter(review => review.last_is_correct).length;
+    const days = [];
+    const trend = [];
+    const trendLength = this.horizon === "monthly" ? 6 : 7;
+    for (let index = trendLength - 1; index >= 0; index--) {
+      const day = new Date(now);
+      day.setHours(0, 0, 0, 0);
+      day.setDate(now.getDate() - index);
+      const nextDay = new Date(day);
+      nextDay.setDate(day.getDate() + 1);
+      trend.push(reviews.filter(review => {
+        const solvedAt = new Date(review.last_solved_at || 0);
+        return solvedAt >= day && solvedAt < nextDay;
+      }).length);
+      days.push(this.horizon === "monthly" ? `${trendLength - index}주차` : day.toLocaleDateString("ko-KR", { weekday: "short" }));
+    }
+
+    return {
+      studentName,
+      grade,
+      solvedCount,
+      targetCount: this.horizon === "daily" ? targetCount : (this.horizon === "weekly" ? targetCount * 7 : totalBank),
+      correctCount,
+      wrongCount: solvedCount - correctCount,
+      streakDays: new Set(reviews.map(review => String(review.last_solved_at || "").slice(0, 10)).filter(Boolean)).size,
+      masteredCount: reviews.filter(review => Number(review.interval) >= 14).length,
+      subjects: subjectsData,
+      weeklyTrend: trend,
+      days,
+      monthlyProgress: reviews.length,
+      totalBank
+    };
   }
 
   /**
@@ -276,7 +344,7 @@ class DadMonitoringApp {
    * 1. KPI 카드 & 2. 시각적 차트 렌더링
    */
   renderChartsAndKPIs() {
-    const data = this.getStudentData();
+    const data = this.dashboardData || this.getStudentData();
     const overallRate = Math.round((data.correctCount / (data.solvedCount || 1)) * 100);
 
     // KPI 1: 푼 문항 수
@@ -507,79 +575,37 @@ class DadMonitoringApp {
   /**
    * 4. 에빙하우스 망각곡선 큐 & 최근 오답 노트 리스트
    */
-  renderSRSStagesAndWrongs() {
-    const isNakyung = (this.student === "nakyung");
+  async renderSRSStagesAndWrongs() {
+    const reviews = await dbService.getStudentReviews(this.student);
+    const stageCounts = { 1: 0, 3: 0, 7: 0, 14: 0 };
+    reviews.forEach(review => {
+      const interval = Number(review.interval);
+      if (interval >= 14) stageCounts[14]++;
+      else if (interval >= 7) stageCounts[7]++;
+      else if (interval >= 3) stageCounts[3]++;
+      else if (interval >= 1) stageCounts[1]++;
+    });
+    document.getElementById("srs-cnt-1").innerText = `${stageCounts[1]}문항`;
+    document.getElementById("srs-cnt-3").innerText = `${stageCounts[3]}문항`;
+    document.getElementById("srs-cnt-7").innerText = `${stageCounts[7]}문항`;
+    document.getElementById("srs-cnt-14").innerText = `${stageCounts[14]}문항`;
 
-    // 망각곡선 4단계 수치 갱신
-    if (isNakyung) {
-      document.getElementById("srs-cnt-1").innerText = "2문항";
-      document.getElementById("srs-cnt-3").innerText = "14문항";
-      document.getElementById("srs-cnt-7").innerText = "28문항";
-      document.getElementById("srs-cnt-14").innerText = "42문항";
-    } else {
-      document.getElementById("srs-cnt-1").innerText = "3문항";
-      document.getElementById("srs-cnt-3").innerText = "18문항";
-      document.getElementById("srs-cnt-7").innerText = "22문항";
-      document.getElementById("srs-cnt-14").innerText = "31문항";
-    }
-
-    // 최근 오답 문항 샘플 리스트 렌더링
     const container = document.getElementById("wrong-list-container");
     if (!container) return;
 
-    const wrongQuestions = isNakyung ? [
-      {
-        subject: "과학",
-        chapter: "6. 에너지 전환과 보존",
-        tagClass: "tag-sci",
-        time: "오늘 16:42",
-        question_text: "질량 $2\\text{kg}$ 인 물체를 지면으로부터 높이 $10\\text{m}$ 에서 가만히 떨어뜨렸다. 지면에 닿기 직전의 운동 에너지는? (단, $g = 9.8\\text{m/s}^2$)",
-        chosen: "1번 (98J)",
-        correct: "2번 (196J)",
-        explanation: "역학적 에너지 보존에 의해 최고점 위치 에너지 $9.8 \\times 2 \\times 10 = 196\\text{J}$ 가 지면 직전 운동 에너지로 전환됩니다."
-      },
-      {
-        subject: "역사",
-        chapter: "V. 일제 강점과 민족 운동의 전개",
-        tagClass: "tag-hist",
-        time: "어제 19:15",
-        question_text: "일제가 1910년대 식민 지배의 경제적 기반을 마련하기 위해 토지 소유권을 엄격히 신고하게 하여 농민의 관습적 경작권을 박탈한 정책은?",
-        chosen: "2번 (산미증식계획)",
-        correct: "1번 (토지조사사업)",
-        explanation: "토지조사사업은 1910년대 시행되었으며, 산미증식계획은 1920년대 쌀 증산 수탈 정책입니다."
-      }
-    ] : [
-      {
-        subject: "수학",
-        chapter: "2단원. 평면도형 (원과 부채꼴)",
-        tagClass: "tag-math",
-        time: "오늘 17:10",
-        question_text: "반지름의 길이가 $4\\text{cm}$ 이고 중심각의 크기가 $90^\\circ$ 인 부채꼴의 넓이는?",
-        chosen: "3번 (8π cm²)",
-        correct: "1번 (4π cm²)",
-        explanation: "부채꼴의 넓이는 $\\pi r^2 \\times \\frac{90}{360} = \\pi \\times 16 \\times \\frac{1}{4} = 4\\pi\\text{cm}^2$ 입니다."
-      },
-      {
-        subject: "수학",
-        chapter: "2단원. 평면도형 (다각형)",
-        tagClass: "tag-math",
-        time: "오늘 16:55",
-        question_text: "$6$각형의 모든 내각의 크기의 총합을 구하시오.",
-        chosen: "2번 (540°)",
-        correct: "3번 (720°)",
-        explanation: "$n$각형 내각의 합 공식은 $180^\\circ \\times (n - 2)$ 이므로 $180^\\circ \\times 4 = 720^\\circ$ 입니다."
-      },
-      {
-        subject: "과학",
-        chapter: "6단원. 빛과 파동",
-        tagClass: "tag-sci",
-        time: "어제 20:04",
-        question_text: "빛이 평면거울에 입사각 $40^\\circ$ 로 입사할 때, 반사의 법칙에 따른 반사각의 크기는?",
-        chosen: "4번 (50°)",
-        correct: "2번 (40°)",
-        explanation: "반사의 법칙에 의해 입사각과 반사각의 크기는 항상 같으므로 반사각은 $40^\\circ$ 입니다."
-      }
-    ];
+    const wrongQuestions = reviews
+      .filter(review => review.last_is_correct === false && review.question?.question_text)
+      .sort((a, b) => new Date(b.last_solved_at || 0) - new Date(a.last_solved_at || 0))
+      .slice(0, 10)
+      .map(review => ({
+        subject: review.question.subject || "공통",
+        tagClass: `tag-${(review.question.subject || "common").toLowerCase()}`,
+        time: review.last_solved_at ? new Date(review.last_solved_at).toLocaleString("ko-KR") : "기록 시간 없음",
+        question_text: review.question.question_text,
+        chosen: "선택 답안 기록 없음",
+        correct: `${review.question.correct_answer}번`,
+        explanation: review.question.explanation || "해설이 제공되지 않았습니다."
+      }));
 
     document.getElementById("wrong-total-badge").innerText = `오답 ${wrongQuestions.length}개`;
 
@@ -635,20 +661,28 @@ class DadMonitoringApp {
 
   renderMath(rawText) {
     if (!rawText) return "";
-    if (typeof katex === "undefined") return rawText;
+    const escapeHtml = value => String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+    if (typeof katex === "undefined") return escapeHtml(rawText);
 
-    try {
-      // 인라인 수식 $...$ 렌더링
-      return rawText.replace(/\$([^\$]+)\$/g, (match, expr) => {
-        try {
-          return katex.renderToString(expr, { throwOnError: false, displayMode: false });
-        } catch (e) {
-          return match;
-        }
-      });
-    } catch (err) {
-      return rawText;
+    const pattern = /\$([^$]+)\$/g;
+    let output = "";
+    let lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(String(rawText))) !== null) {
+      output += escapeHtml(String(rawText).slice(lastIndex, match.index));
+      try {
+        output += katex.renderToString(match[1], { throwOnError: false, displayMode: false });
+      } catch (error) {
+        output += escapeHtml(match[0]);
+      }
+      lastIndex = pattern.lastIndex;
     }
+    return output + escapeHtml(String(rawText).slice(lastIndex));
   }
 }
 
