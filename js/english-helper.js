@@ -70,7 +70,6 @@ const MIDDLE_SCHOOL_VOCAB = {
   "quality": { ko: "품질, 질, 우수성", pos: "명사", def: "The standard of something as measured against other things." },
   "practice": { ko: "관행, 실천, 연습", pos: "명사/동사", def: "The actual application or use of an idea, belief, or method." },
   "discard": { ko: "버리다, 폐기하다", pos: "동사", def: "Get rid of someone or something as no longer useful or desirable." },
-  "routine": { ko: "일상적인, 정기적인", pos: "형용사/명사", def: "Performed as part of a regular procedure rather than for a special reason." },
   "valuable": { ko: "귀중한, 가치 있는", pos: "형용사", def: "Worth a great deal of money; extremely useful or important." },
   "environment": { ko: "환경", pos: "명사", def: "The surroundings or conditions in which a person, animal, or plant lives." },
   "environmental": { ko: "환경의, 환경과 관련된", pos: "형용사", def: "Relating to the natural world and the impact of human activity." },
@@ -94,9 +93,89 @@ const MIDDLE_SCHOOL_VOCAB = {
   "strawberry": { ko: "딸기", pos: "명사", def: "A sweet soft red fruit with a seed-studded surface." },
   "brew": { ko: "(커피·차를) 끓이다, 우리다", pos: "동사", def: "Make a drink by boiling or soaking ingredients." },
   "butterfly": { ko: "나비", pos: "명사", def: "An insect with four large, brightly colored wings." },
-  "quality": { ko: "우수한, 양질의", pos: "형용사", def: "Of a high standard of excellence." },
   "energy": { ko: "에너지, 활력", pos: "명사", def: "The strength and vitality required for sustained activity." },
-  "upcoming": { ko: "다가오는, 곧 있을", pos: "형용사", def: "Forthcoming; about to happen." }
+  "upcoming": { ko: "다가오는, 곧 있을", pos: "형용사", def: "Forthcoming; about to happen." },
+  // 문제 지문 및 중학과정 핵심 빈출 어휘 보강
+  "stop": { ko: "멈추다, 그만두다", pos: "동사", def: "Come to an end; cease to happen or exist." },
+  "dream": { ko: "꿈, 꿈꾸다", pos: "명사/동사", def: "A cherished aspiration, ambition, or ideal." },
+  "share": { ko: "공유하다, 나누다", pos: "동사", def: "Have a portion of something with another or others." },
+  "mistake": { ko: "실수, 잘못", pos: "명사", def: "An act or judgment that is misguided or wrong." },
+  "digital": { ko: "디지털의", pos: "형용사", def: "Relating to computer technology or digital data." },
+  "detox": { ko: "디톡스, 해독", pos: "명사", def: "A process of clearing unhealthy habits or toxins." },
+  "device": { ko: "기기, 장치", pos: "명사", def: "A piece of electronic equipment made for a particular purpose." },
+  "disrupt": { ko: "방해하다, 중단시키다", pos: "동사", def: "Interrupt an event, activity, or process by causing a disturbance." },
+  "anxiety": { ko: "불안, 걱정", pos: "명사", def: "A feeling of worry, nervousness, or unease." },
+  "restore": { ko: "회복시키다, 되찾다", pos: "동사", def: "Bring back or re-establish a previous condition." },
+  "balance": { ko: "균형, 조화", pos: "명사", def: "An even distribution of weight or equilibrium." },
+  "expert": { ko: "전문가", pos: "명사", def: "A person with comprehensive knowledge in a subject." },
+  "artificial": { ko: "인공의, 인조의", pos: "형용사", def: "Made or produced by human beings rather than occurring naturally." },
+  "intelligence": { ko: "지능, 지성", pos: "명사", def: "The ability to acquire and apply knowledge and skills." },
+  "algorithm": { ko: "알고리즘", pos: "명사", def: "A process or set of rules to be followed in calculations." },
+  "analyze": { ko: "분석하다", pos: "동사", def: "Examine methodically and in detail the constitution or structure." },
+  "accurate": { ko: "정확한, 정밀한", pos: "형용사", def: "Correct in all details; exact." },
+  "empathy": { ko: "공감, 감정이입", pos: "명사", def: "The ability to understand and share the feelings of another." },
+  "ethical": { ko: "윤리적인, 도덕적인", pos: "형용사", def: "Relating to moral principles." },
+  "replicate": { ko: "복제하다, 모방하다", pos: "동사", def: "Make an exact copy of; reproduce." },
+  "emphasize": { ko: "강조하다, 역설하다", pos: "동사", def: "Give special importance or prominence to something." },
+  "revolutionize": { ko: "대변혁을 일으키다", pos: "동사", def: "Change something radically or fundamentally." },
+  "communicate": { ko: "소통하다, 대화하다", pos: "동사", def: "Share or exchange information, news, or ideas." },
+  "notification": { ko: "알림, 통지", pos: "명사", def: "The action of notifying someone or a notice." },
+  "focus": { ko: "집중, 초점", pos: "명사/동사", def: "The center of interest or activity." },
+  "suggest": { ko: "제안하다, 추천하다", pos: "동사", def: "Put forward for consideration." },
+  "aside": { ko: "곁에, 따로", pos: "부사", def: "To one side; out of the way." },
+  "spend": { ko: "보내다, 쓰다", pos: "동사", def: "Pass time or disburse money." },
+  "rapidly": { ko: "급속히, 빠르게", pos: "부사", def: "Very quickly; at a great rate." },
+  "transform": { ko: "변형시키다, 변화시키다", pos: "동사", def: "Make a marked change in form, nature, or appearance." },
+  "global": { ko: "전 세계적인, 지구의", pos: "형용사", def: "Relating to the whole world; worldwide." },
+  "healthcare": { ko: "의료, 보건 관리", pos: "명사", def: "The maintenance and improvement of physical and mental health." },
+  "medical": { ko: "의학의, 의료의", pos: "형용사", def: "Relating to the science of medicine." },
+  "scan": { ko: "검사, 스캔", pos: "명사/동사", def: "Look at all parts of something carefully." },
+  "nevertheless": { ko: "그럼에도 불구하고", pos: "부사", def: "In spite of that; notwithstanding." },
+  "distinctly": { ko: "확연하게, 뚜렷하게", pos: "부사", def: "In a way that is readily distinguishable." },
+  "remain": { ko: "남아 있다, 유지되다", pos: "동사", def: "Continue to exist or stay in a state." },
+  "draw": { ko: "그리다, 끌어당기다", pos: "동사", def: "Produce a picture or diagram." },
+  "drawing": { ko: "그림, 소묘", pos: "명사", def: "A picture or diagram made with pencil or pen." },
+  "sketchpad": { ko: "스케치북", pos: "명사", def: "A pad of drawing paper." },
+  "fear": { ko: "두려워하다, 공포", pos: "동사/명사", def: "An unpleasant emotion caused by danger." },
+  "item": { ko: "물품, 항목", pos: "명사", def: "An individual article or unit." },
+  "trend": { ko: "동향, 유행, 추세", pos: "명사", def: "A general direction in which something is developing." },
+  "rethink": { ko: "다시 생각하다, 재고하다", pos: "동사", def: "Consider a policy or action again." },
+  "unlike": { ko: "~와 다른, ~와 달리", pos: "전치사", def: "Different from; not similar to." },
+  "raw": { ko: "가공되지 않은, 날것의", pos: "형용사", def: "In its natural state; not yet processed." },
+  "form": { ko: "형태, 양식", pos: "명사", def: "The visible shape or configuration of something." },
+  "add": { ko: "더하다, 추가하다", pos: "동사", def: "Join something to something else to increase size or amount." },
+  "apple": { ko: "사과", pos: "명사", def: "A round fruit with red or green skin." },
+  "book": { ko: "책", pos: "명사", def: "A written or printed work consisting of pages." },
+  "school": { ko: "학교", pos: "명사", def: "An institution for educating children." },
+  "student": { ko: "학생", pos: "명사", def: "A person who is studying at school or college." },
+  "teacher": { ko: "선생님, 교사", pos: "명사", def: "A person who teaches, especially in a school." },
+  "question": { ko: "질문, 문제", pos: "명사", def: "A sentence worded to elicit information." },
+  "answer": { ko: "답, 정답, 대답하다", pos: "명사/동사", def: "A response to a question or problem." },
+  "listen": { ko: "듣다, 귀를 기울이다", pos: "동사", def: "Give one's attention to a sound." },
+  "speak": { ko: "말하다, 이야기하다", pos: "동사", def: "Say words or convey information orally." },
+  "read": { ko: "읽다", pos: "동사", def: "Look at and comprehend the meaning of written matter." },
+  "write": { ko: "쓰다, 작성하다", pos: "동사", def: "Mark letters, words, or symbols on a surface." },
+  "understand": { ko: "이해하다", pos: "동사", def: "Perceive the intended meaning of words or ideas." },
+  "remember": { ko: "기억하다", pos: "동사", def: "Bring to one's mind an awareness of someone or something." },
+  "important": { ko: "중요한", pos: "형용사", def: "Of great significance or value." },
+  "difficult": { ko: "어려운, 힘든", pos: "형용사", def: "Needing much effort or skill to accomplish." },
+  "easy": { ko: "쉬운", pos: "형용사", def: "Achieved without great effort." },
+  "different": { ko: "다른, 차이가 나는", pos: "형용사", def: "Not the same as another; unlike." },
+  "similar": { ko: "유사한, 비슷한", pos: "형용사", def: "Having a resemblance in appearance or character." },
+  "technology": { ko: "기술, 과학기술", pos: "명사", def: "The application of scientific knowledge for practical purposes." },
+  "computer": { ko: "컴퓨터", pos: "명사", def: "An electronic device for storing and processing data." },
+  "friend": { ko: "친구", pos: "명사", def: "A person whom one knows and has affection for." },
+  "family": { ko: "가족", pos: "명사", def: "A group of parents and children living together." },
+  "walk": { ko: "걷다, 산책하다", pos: "동사/명사", def: "Move at a regular pace by foot." },
+  "morning": { ko: "아침", pos: "명사", def: "The period of time between midnight and noon." },
+  "evening": { ko: "저녁", pos: "명사", def: "The period of time at the end of the day." },
+  "hour": { ko: "시간", pos: "명사", def: "A period of time equal to 60 minutes." },
+  "day": { ko: "하루, 날", pos: "명사", def: "A period of twenty-four hours." },
+  "world": { ko: "세계, 세상", pos: "명사", def: "The earth, together with all countries and peoples." },
+  "nature": { ko: "자연", pos: "명사", def: "The physical world collectively." },
+  "science": { ko: "과학", pos: "명사", def: "The systematic study of the physical and natural world." },
+  "history": { ko: "역사", pos: "명사", def: "The study of past events." },
+  "art": { ko: "예술, 미술", pos: "명사", def: "The expression of human creative skill and imagination." }
 };
 
 class EnglishAssistant {
@@ -171,7 +250,7 @@ class EnglishAssistant {
 
           <div class="eng-modal-footer">
             <div class="eng-modal-search-wrap">
-              <input type="text" class="eng-modal-search-input" id="eng-modal-search-input" placeholder="다른 영단어 검색 (예: courage, routine)..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <input type="text" class="eng-modal-search-input" id="eng-modal-search-input" placeholder="영단어 또는 한글 뜻 검색 (예: courage, routine, 사과)..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
               <button type="button" class="btn-eng-modal-search" id="btn-eng-modal-search-submit">검색</button>
             </div>
           </div>
@@ -183,7 +262,6 @@ class EnglishAssistant {
 
     // 이벤트 리스너 바인딩
     const backdrop = document.getElementById('eng-word-modal-backdrop');
-    const modal = document.getElementById('eng-word-modal');
     const closeBtn = document.getElementById('btn-eng-modal-close');
     const searchInput = document.getElementById('eng-modal-search-input');
     const searchBtn = document.getElementById('btn-eng-modal-search-submit');
@@ -197,7 +275,6 @@ class EnglishAssistant {
       const q = searchInput?.value?.trim();
       if (q) {
         this.openWordModal(q);
-        if (searchInput) searchInput.value = '';
       }
     };
 
@@ -211,13 +288,13 @@ class EnglishAssistant {
   }
 
   /**
-   * 단어 클린업 (특수문자 및 불필요한 구두점 제거)
+   * 단어 클린업 (특수문자 및 불필요한 구두점 제거, 한글/영문 보존)
    */
   cleanWord(raw) {
     if (!raw) return '';
     return raw
       .trim()
-      .replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, '') // 앞뒤 구두점 제거
+      .replace(/^[^\w가-힣]+|[^\w가-힣]+$/g, '')
       .toLowerCase();
   }
 
@@ -232,7 +309,38 @@ class EnglishAssistant {
   }
 
   /**
-   * Free Dictionary API + 로컬 사전 결합 조회
+   * 굴절형 단어 원형 추론 (lemmatization candidates)
+   */
+  getCandidateForms(word) {
+    if (!word || /[가-힣]/.test(word)) return [word];
+    const list = [word];
+    if (word.endsWith('ies') && word.length > 4) list.push(word.slice(0, -3) + 'y');
+    if (word.endsWith('es') && word.length > 3) list.push(word.slice(0, -2));
+    if (word.endsWith('s') && !word.endsWith('ss') && word.length > 2) list.push(word.slice(0, -1));
+    if (word.endsWith('ied') && word.length > 4) list.push(word.slice(0, -3) + 'y');
+    if (word.endsWith('ed') && word.length > 3) {
+      list.push(word.slice(0, -2));
+      list.push(word.slice(0, -1));
+      if (word.length > 4 && word[word.length - 3] === word[word.length - 4]) {
+        list.push(word.slice(0, -3));
+      }
+    }
+    if (word.endsWith('ing') && word.length > 4) {
+      list.push(word.slice(0, -3));
+      list.push(word.slice(0, -3) + 'e');
+      if (word.length > 5 && word[word.length - 4] === word[word.length - 5]) {
+        list.push(word.slice(0, -4));
+      }
+    }
+    if (word.endsWith('ly') && word.length > 3) {
+      list.push(word.slice(0, -2));
+      if (word.endsWith('ily')) list.push(word.slice(0, -3) + 'y');
+    }
+    return [...new Set(list)];
+  }
+
+  /**
+   * 다중 소스 (로컬 중학사전 + Datamuse + MyMemory + FreeDict) 결합 초고속/정밀 조회
    */
   async lookupWord(word) {
     const clean = this.cleanWord(word);
@@ -253,13 +361,73 @@ class EnglishAssistant {
       }
     } catch (_) {}
 
-    // 로컬 중학 사전 기본값 확인
-    const localEntry = MIDDLE_SCHOOL_VOCAB[clean] || null;
+    // 한글 단어 검색 지원 (예: '용기', '습관', '사과')
+    const isKorean = /[가-힣]/.test(clean);
+    if (isKorean) {
+      // 1) 로컬 사전에서 국문 뜻 일치 검색
+      for (const [engKey, entry] of Object.entries(MIDDLE_SCHOOL_VOCAB)) {
+        if (entry.ko.includes(clean)) {
+          const matched = {
+            word: engKey,
+            phonetic: `/${engKey}/`,
+            audioUrl: '',
+            koreanMeaning: `${clean} → ${entry.ko}`,
+            koreanPos: entry.pos,
+            meanings: [{
+              partOfSpeech: entry.pos,
+              defs: [{ definition: entry.def, example: '' }]
+            }],
+            hasNativeAudio: false
+          };
+          this.dictCache.set(clean, matched);
+          return matched;
+        }
+      }
+
+      // 2) MyMemory 무료 번역 API로 한글 -> 영단어 변환 후 재조회
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const transRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=ko|en`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (transRes.ok) {
+          const transJson = await transRes.json();
+          const engTrans = transJson?.responseData?.translatedText?.trim().toLowerCase();
+          if (engTrans && !/[가-힣]/.test(engTrans)) {
+            const engResult = await this.lookupWord(engTrans);
+            if (engResult) {
+              const merged = {
+                ...engResult,
+                koreanMeaning: `${clean} (${engResult.koreanMeaning})`
+              };
+              this.dictCache.set(clean, merged);
+              return merged;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 3. 로컬 중학 사전 기본값 및 원형(lemmatization) 확인
+    const candidates = this.getCandidateForms(clean);
+    let localEntry = null;
+    let resolvedWord = clean;
+
+    for (const cand of candidates) {
+      if (MIDDLE_SCHOOL_VOCAB[cand]) {
+        localEntry = MIDDLE_SCHOOL_VOCAB[cand];
+        resolvedWord = cand;
+        break;
+      }
+    }
 
     if (localEntry) {
       const localResult = {
         word: clean,
-        phonetic: `/${clean}/`,
+        resolvedWord: resolvedWord !== clean ? resolvedWord : undefined,
+        phonetic: `/${resolvedWord}/`,
         audioUrl: '',
         koreanMeaning: localEntry.ko,
         koreanPos: localEntry.pos,
@@ -276,26 +444,56 @@ class EnglishAssistant {
       return localResult;
     }
 
+    // 4. Free Dictionary API 호출 (1.2초 타임아웃 제한 적용으로 행 방지)
     let apiData = null;
-    try {
-      // 3. Free Dictionary API 호출 (https://dictionaryapi.dev/)
-      const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(clean)}`, {
-        headers: { 'Accept': 'application/json' }
-      });
+    for (const cand of candidates.slice(0, 2)) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cand)}`, {
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
 
-      if (res.ok) {
-        const json = await res.json();
-        if (Array.isArray(json) && json.length > 0) {
-          apiData = json[0];
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json) && json.length > 0) {
+            apiData = json[0];
+            resolvedWord = cand;
+            break;
+          }
         }
-      }
-    } catch (err) {
-      console.warn(`[EnglishAssistant] Dictionary API 조회 실패 (${clean}):`, err);
+      } catch (_) {}
     }
 
-    // 4. 발음 오디오 및 발음 기호 추출
+    // 5. Datamuse 초고속 사전 백업 호출 (Free Dictionary API 오류/타임아웃 시 0.2초 이내 응답)
+    let datamuseData = null;
+    if (!apiData) {
+      for (const cand of candidates.slice(0, 2)) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1500);
+          const res = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(cand)}&md=dr&max=1`, {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (res.ok) {
+            const json = await res.json();
+            if (Array.isArray(json) && json.length > 0 && json[0].defs && json[0].defs.length > 0) {
+              datamuseData = json[0];
+              resolvedWord = cand;
+              break;
+            }
+          }
+        } catch (_) {}
+      }
+    }
+
+    // 6. 발음 오디오 및 발음 기호 추출
     let audioUrl = '';
     let phoneticText = '';
+    const meaningsList = [];
 
     if (apiData) {
       phoneticText = apiData.phonetic || '';
@@ -308,43 +506,64 @@ class EnglishAssistant {
           }
         }
       }
-    }
-
-    // 5. 의미 목록 구조화
-    const meaningsList = [];
-
-    if (apiData && Array.isArray(apiData.meanings)) {
-      apiData.meanings.forEach(m => {
-        const pos = m.partOfSpeech || '기타';
-        const defs = (m.definitions || []).slice(0, 2).map(d => ({
-          definition: d.definition || '',
-          example: d.example || ''
-        }));
-        if (defs.length > 0) {
-          meaningsList.push({ partOfSpeech: pos, defs });
-        }
+      if (Array.isArray(apiData.meanings)) {
+        apiData.meanings.forEach(m => {
+          const pos = m.partOfSpeech || '기타';
+          const defs = (m.definitions || []).slice(0, 2).map(d => ({
+            definition: d.definition || '',
+            example: d.example || ''
+          }));
+          if (defs.length > 0) {
+            meaningsList.push({ partOfSpeech: pos, defs });
+          }
+        });
+      }
+    } else if (datamuseData && Array.isArray(datamuseData.defs)) {
+      if (datamuseData.tags) {
+        const pronTag = datamuseData.tags.find(t => t.startsWith('pron:'));
+        if (pronTag) phoneticText = `[${pronTag.replace('pron:', '').trim().toLowerCase()}]`;
+      }
+      const posMap = { n: 'noun', v: 'verb', adj: 'adjective', adv: 'adverb' };
+      datamuseData.defs.slice(0, 3).forEach(dStr => {
+        const parts = dStr.split('\t');
+        const posCode = parts[0];
+        const defText = parts[1] || parts[0];
+        meaningsList.push({
+          partOfSpeech: posMap[posCode] || posCode || '기타',
+          defs: [{ definition: defText.trim(), example: '' }]
+        });
       });
     }
 
-    // 6. 한국어 번역 뜻 보강 (로컬 사전에 없으면 MyMemory 무료 번역 API 보조 호출)
-    let koreanMeaning = localEntry ? localEntry.ko : '';
-    let koreanPos = localEntry ? localEntry.pos : '';
+    // 7. 한국어 번역 뜻 보강 (MyMemory 무료 번역 API 보조 호출)
+    let koreanMeaning = '';
+    let koreanPos = '';
 
-    if (!koreanMeaning) {
-      try {
-        const transRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=en|ko`);
-        if (transRes.ok) {
-          const transJson = await transRes.json();
-          if (transJson?.responseData?.translatedText && transJson.responseData.translatedText !== clean) {
-            koreanMeaning = transJson.responseData.translatedText;
-          }
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const transRes = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=en|ko`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (transRes.ok) {
+        const transJson = await transRes.json();
+        const text = transJson?.responseData?.translatedText;
+        if (text && text.toLowerCase() !== clean.toLowerCase()) {
+          koreanMeaning = text;
         }
-      } catch (_) {}
+      }
+    } catch (_) {}
+
+    // 결과가 전무할 경우 null 반환
+    if (!koreanMeaning && meaningsList.length === 0 && !phoneticText) {
+      return null;
     }
 
     const result = {
       word: clean,
-      phonetic: phoneticText || (localEntry ? `/${clean}/` : ''),
+      resolvedWord: resolvedWord !== clean ? resolvedWord : undefined,
+      phonetic: phoneticText || `/${resolvedWord}/`,
       audioUrl: audioUrl || '',
       koreanMeaning: koreanMeaning || (meaningsList.length > 0 ? '영문 해설 참조' : '뜻을 찾을 수 없습니다.'),
       koreanPos: koreanPos || (meaningsList[0]?.partOfSpeech || ''),
@@ -364,7 +583,7 @@ class EnglishAssistant {
   /**
    * 단어 팝업 모달 열기 및 단어 정보 렌더링
    */
-  async openWordModal(rawWord) {
+  async openWordModal(rawWord = '') {
     const clean = this.cleanWord(rawWord);
 
     this.isModalOpen = true;
@@ -373,20 +592,45 @@ class EnglishAssistant {
     const phoneticEl = document.getElementById('eng-modal-phonetic-text');
     const bodyEl = document.getElementById('eng-modal-body');
     const audioBtn = document.getElementById('btn-eng-modal-audio');
+    const searchInput = document.getElementById('eng-modal-search-input');
 
     if (!backdrop || !bodyEl) return;
 
     backdrop.style.display = 'flex';
+
     if (!clean) {
-      if (wordEl) wordEl.innerText = '단어 검색';
+      if (wordEl) wordEl.innerText = '🔍 단어 검색';
       if (phoneticEl) phoneticEl.innerText = '';
-      bodyEl.innerHTML = '<div class="eng-modal-empty"><p>검색할 영단어를 입력하세요.</p></div>';
-      document.getElementById('eng-modal-search-input')?.focus();
+      if (audioBtn) audioBtn.style.display = 'none';
+      bodyEl.innerHTML = `
+        <div class="eng-modal-empty">
+          <p>궁금한 영단어(또는 한글 뜻)를 아래 검색창에 입력해 보세요.</p>
+          <div class="eng-quick-tags">
+            <span class="eng-tag-hint">추천 단어:</span>
+            <button type="button" class="btn-eng-tag" data-tag="courage">courage</button>
+            <button type="button" class="btn-eng-tag" data-tag="routine">routine</button>
+            <button type="button" class="btn-eng-tag" data-tag="upcycle">upcycle</button>
+            <button type="button" class="btn-eng-tag" data-tag="biodiversity">biodiversity</button>
+            <button type="button" class="btn-eng-tag" data-tag="essential">essential</button>
+          </div>
+        </div>
+      `;
+      bodyEl.querySelectorAll('.btn-eng-tag').forEach(tagBtn => {
+        tagBtn.addEventListener('click', () => {
+          this.openWordModal(tagBtn.dataset.tag);
+        });
+      });
+      if (searchInput) {
+        searchInput.value = '';
+        setTimeout(() => searchInput.focus(), 80);
+      }
       return;
     }
 
+    if (audioBtn) audioBtn.style.display = 'inline-flex';
     if (wordEl) wordEl.innerText = clean;
     if (phoneticEl) phoneticEl.innerText = '조회 중...';
+    if (searchInput) searchInput.value = clean;
 
     bodyEl.innerHTML = `
       <div class="eng-modal-loading">
@@ -404,9 +648,10 @@ class EnglishAssistant {
 
     if (!data) {
       if (phoneticEl) phoneticEl.innerText = '';
+      if (audioBtn) audioBtn.style.display = 'none';
       bodyEl.innerHTML = `
         <div class="eng-modal-empty">
-          <p>단어 정보를 불러오지 못했습니다.</p>
+          <p><strong>"${this.escapeHtml(clean)}"</strong>에 대한 사전 정보를 불러오지 못했습니다.</p>
           <button type="button" class="btn-eng-audio-small" id="btn-modal-speak-direct">🔊 발음 바로 듣기</button>
         </div>
       `;
@@ -416,7 +661,11 @@ class EnglishAssistant {
       return;
     }
 
+    if (audioBtn) audioBtn.style.display = 'inline-flex';
     if (phoneticEl) phoneticEl.innerText = data.phonetic || '';
+    if (data.resolvedWord && data.resolvedWord !== clean) {
+      if (wordEl) wordEl.innerHTML = `${this.escapeHtml(clean)} <span style="font-size:0.9rem; color:#94a3b8; font-weight:normal;">(원형: ${this.escapeHtml(data.resolvedWord)})</span>`;
+    }
 
     // 발음 재생 바인딩 (원어민 mp3 우선, 없으면 TTS fallback)
     if (audioBtn) {
@@ -524,9 +773,21 @@ class EnglishAssistant {
 
     const utt = new SpeechSynthesisUtterance(word);
     utt.lang = 'en-US';
-    utt.rate = 0.9;
+    if (!this.currentVoice && this.speechSynth) {
+      const voices = this.speechSynth.getVoices() || [];
+      this.currentVoice = englishVoices.find(v => (
+        v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('US')
+      ) && !v.name.includes('Compact')) || englishVoices.find(v => v.lang === 'en-US') || englishVoices[0] || null;
+    }
     if (this.currentVoice) utt.voice = this.currentVoice;
-    this.speechSynth.speak(utt);
+    utt.rate = 0.9;
+
+    // Chromium/WebView cancel() 후 즉시 speak() 호출 시 취소 드롭 현상 방지
+    setTimeout(() => {
+      if (this.speechSynth) {
+        this.speechSynth.speak(utt);
+      }
+    }, 50);
   }
 
   /**
@@ -563,25 +824,36 @@ class EnglishAssistant {
     const cleanText = String(text ?? '').replace(/\[.*?\]/g, '').replace(/[\n\r]+/g, ' ').trim();
     if (!cleanText) return;
 
-    this.currentUtterance = new SpeechSynthesisUtterance(cleanText);
-    this.currentUtterance.lang = 'en-US';
-    this.currentUtterance.rate = this.ttsRate;
-    if (this.currentVoice) this.currentUtterance.voice = this.currentVoice;
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'en-US';
 
-    this.currentUtterance.onstart = () => {
+    // 음성 지연 로드 대비 폴백
+    if (!this.currentVoice && this.speechSynth) {
+      const voices = this.speechSynth.getVoices() || [];
+      this.currentVoice = englishVoices.find(v => (
+        v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('US')
+      ) && !v.name.includes('Compact')) || englishVoices.find(v => v.lang === 'en-US') || englishVoices[0] || null;
+    }
+    if (this.currentVoice) utterance.voice = this.currentVoice;
+    // 중요: 삼성 및 안드로이드 TTS 엔진에서는 voice 할당 후 rate를 지정해야 배속이 초기화되지 않음
+    utterance.rate = this.ttsRate;
+
+    this.currentUtterance = utterance;
+
+    utterance.onstart = () => {
       this.isPlayingTTS = true;
       this.isPausedTTS = false;
       this.updateTTSButtonUI();
     };
 
-    this.currentUtterance.onend = () => {
+    utterance.onend = () => {
       this.isPlayingTTS = false;
       this.isPausedTTS = false;
       this.currentUtterance = null;
       this.updateTTSButtonUI();
     };
 
-    this.currentUtterance.onerror = (e) => {
+    utterance.onerror = (e) => {
       if (e.error !== 'canceled' && e.error !== 'interrupted') {
         console.warn('[EnglishAssistant] TTS 재생 오류:', e);
       }
@@ -591,7 +863,12 @@ class EnglishAssistant {
       this.updateTTSButtonUI();
     };
 
-    this.speechSynth.speak(this.currentUtterance);
+    // Chromium/WebView cancel() 후 즉시 speak() 호출 시 취소 드롭 현상 방지
+    setTimeout(() => {
+      if (this.currentUtterance === utterance && this.speechSynth) {
+        this.speechSynth.speak(utterance);
+      }
+    }, 60);
   }
 
   /**
@@ -621,9 +898,9 @@ class EnglishAssistant {
    */
   setRate(rate) {
     this.ttsRate = rate;
-    // 배속 버튼 UI 활성화 갱신
+    // 배속 버튼 UI 활성화 갱신 (선택된 배속 정확히 표시)
     document.querySelectorAll('.btn-eng-speed').forEach(btn => {
-      btn.classList.toggle('active', parseFloat(btn.dataset.speed) === rate);
+      btn.classList.toggle('active', Math.abs(parseFloat(btn.dataset.speed) - rate) < 0.05);
     });
 
     // 만약 현재 재생 중이었다면 새 배속으로 재시작
@@ -724,6 +1001,14 @@ class EnglishAssistant {
       translationText = question.passage_translation;
     }
 
+    const speedSelectorHtml = `
+      <div class="eng-speed-selector" title="재생 속도 조절">
+        <button type="button" class="btn-eng-speed ${Math.abs(this.ttsRate - 0.8) < 0.05 ? 'active' : ''}" data-speed="0.8">0.8x</button>
+        <button type="button" class="btn-eng-speed ${Math.abs(this.ttsRate - 1.0) < 0.05 ? 'active' : ''}" data-speed="1.0">1.0x</button>
+        <button type="button" class="btn-eng-speed ${Math.abs(this.ttsRate - 1.2) < 0.05 ? 'active' : ''}" data-speed="1.2">1.2x</button>
+      </div>
+    `;
+
     const toolbarHtml = hasPassage ? `
       <!-- 영어 학습 보조 도구 바 -->
       <div class="eng-passage-toolbar" id="eng-passage-toolbar">
@@ -732,12 +1017,7 @@ class EnglishAssistant {
             <span class="eng-tts-icon">🔊</span>
             <span class="eng-tts-label">지문 듣기</span>
           </button>
-          
-          <div class="eng-speed-selector" title="재생 속도 조절">
-            <button type="button" class="btn-eng-speed" data-speed="0.8">0.8x</button>
-            <button type="button" class="btn-eng-speed active" data-speed="1.0">1.0x</button>
-            <button type="button" class="btn-eng-speed" data-speed="1.2">1.2x</button>
-          </div>
+          ${speedSelectorHtml}
         </div>
 
         <div class="eng-toolbar-right">
@@ -763,6 +1043,7 @@ class EnglishAssistant {
             <span class="eng-tts-icon">🔊</span>
             <span class="eng-tts-label">문장 듣기</span>
           </button>
+          ${speedSelectorHtml}
         </div>
         <div class="eng-toolbar-right">
           <button type="button" class="btn-eng-tool btn-eng-search" id="btn-eng-dict-open" title="단어 검색하기">
@@ -802,15 +1083,15 @@ class EnglishAssistant {
     }
 
     // 이벤트 리스너 연결
-    // 1. 지문 TTS 듣기
+    // 1. 지문/문장 TTS 듣기
     const ttsBtn = document.getElementById('btn-eng-tts-play') || document.getElementById('btn-eng-q-tts');
     ttsBtn?.addEventListener('click', () => {
       const textToSpeak = hasPassage ? passage : (question.question_text || '');
       this.speakPassage(textToSpeak);
     });
 
-    // 2. 재생 속도
-    document.querySelectorAll('.btn-eng-speed').forEach(btn => {
+    // 2. 재생 속도 조절 (지문형/단문형 모두 지원)
+    passageBox.querySelectorAll('.btn-eng-speed').forEach(btn => {
       btn.addEventListener('click', () => {
         const speed = parseFloat(btn.dataset.speed || '1.0');
         this.setRate(speed);
@@ -821,10 +1102,10 @@ class EnglishAssistant {
     const transBtn = document.getElementById('btn-eng-trans-toggle');
     transBtn?.addEventListener('click', () => this.toggleTranslation());
 
-    // 4. 단어 검색창 오픈
+    // 4. 단어 검색창 오픈 (초기 빈 검색 상태로 오픈하여 직접 입력 가능)
     const dictOpenBtn = document.getElementById('btn-eng-dict-open');
     dictOpenBtn?.addEventListener('click', () => {
-      this.openWordModal('dictionary');
+      this.openWordModal('');
     });
 
     // 5. 지문 단어 터치(클릭) 이벤트 위임
