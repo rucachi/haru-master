@@ -221,6 +221,16 @@ class EnglishAssistant {
       .toLowerCase();
   }
 
+  escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[char]);
+  }
+
   /**
    * Free Dictionary API + 로컬 사전 결합 조회
    */
@@ -245,6 +255,26 @@ class EnglishAssistant {
 
     // 로컬 중학 사전 기본값 확인
     const localEntry = MIDDLE_SCHOOL_VOCAB[clean] || null;
+
+    if (localEntry) {
+      const localResult = {
+        word: clean,
+        phonetic: `/${clean}/`,
+        audioUrl: '',
+        koreanMeaning: localEntry.ko,
+        koreanPos: localEntry.pos,
+        meanings: [{
+          partOfSpeech: localEntry.pos,
+          defs: [{ definition: localEntry.def, example: '' }]
+        }],
+        hasNativeAudio: false
+      };
+      this.dictCache.set(clean, localResult);
+      try {
+        sessionStorage.setItem(`hm_dict_${clean}`, JSON.stringify(localResult));
+      } catch (_) {}
+      return localResult;
+    }
 
     let apiData = null;
     try {
@@ -336,7 +366,6 @@ class EnglishAssistant {
    */
   async openWordModal(rawWord) {
     const clean = this.cleanWord(rawWord);
-    if (!clean) return;
 
     this.isModalOpen = true;
     const backdrop = document.getElementById('eng-word-modal-backdrop');
@@ -348,13 +377,21 @@ class EnglishAssistant {
     if (!backdrop || !bodyEl) return;
 
     backdrop.style.display = 'flex';
+    if (!clean) {
+      if (wordEl) wordEl.innerText = '단어 검색';
+      if (phoneticEl) phoneticEl.innerText = '';
+      bodyEl.innerHTML = '<div class="eng-modal-empty"><p>검색할 영단어를 입력하세요.</p></div>';
+      document.getElementById('eng-modal-search-input')?.focus();
+      return;
+    }
+
     if (wordEl) wordEl.innerText = clean;
     if (phoneticEl) phoneticEl.innerText = '조회 중...';
 
     bodyEl.innerHTML = `
       <div class="eng-modal-loading">
         <span class="eng-loading-spinner"></span>
-        <span>사전에서 <strong>"${clean}"</strong> 뜻을 가져오는 중...</span>
+        <span>사전에서 <strong>"${this.escapeHtml(clean)}"</strong> 뜻을 가져오는 중...</span>
       </div>
     `;
 
@@ -395,8 +432,8 @@ class EnglishAssistant {
           <ul class="eng-defs-list">
             ${m.defs.map(d => `
               <li>
-                <div class="eng-def-text">${d.definition}</div>
-                ${d.example ? `<div class="eng-def-example">"${d.example}"</div>` : ''}
+                <div class="eng-def-text">${this.escapeHtml(d.definition)}</div>
+                ${d.example ? `<div class="eng-def-example">"${this.escapeHtml(d.example)}"</div>` : ''}
               </li>
             `).join('')}
           </ul>
@@ -407,8 +444,8 @@ class EnglishAssistant {
     bodyEl.innerHTML = `
       <div class="eng-primary-meaning-box">
         <div class="eng-korean-row">
-          <span class="eng-korean-meaning">${data.koreanMeaning}</span>
-          ${data.koreanPos ? `<span class="eng-korean-pos">(${data.koreanPos})</span>` : ''}
+          <span class="eng-korean-meaning">${this.escapeHtml(data.koreanMeaning)}</span>
+          ${data.koreanPos ? `<span class="eng-korean-pos">(${this.escapeHtml(data.koreanPos)})</span>` : ''}
         </div>
       </div>
       ${meaningsHtml ? `
@@ -450,12 +487,11 @@ class EnglishAssistant {
    * 단어 발음 재생 (원어민 오디오 mp3 or Web Speech TTS fallback)
    */
   playWordPronunciation(word, audioUrl) {
+    // 기존 지문 TTS 및 재생 중인 오디오 즉시 정지 & 상태 초기화
+    this.stopAudio();
+
     if (audioUrl) {
       try {
-        if (this.audioElement) {
-          this.audioElement.pause();
-          this.audioElement = null;
-        }
         this.audioElement = new Audio(audioUrl);
         const playPromise = this.audioElement.play();
         if (playPromise !== undefined) {
@@ -483,7 +519,9 @@ class EnglishAssistant {
       return;
     }
 
-    this.speechSynth.cancel();
+    // 기존 지문 TTS 및 오디오 정지 & 상태 초기화
+    this.stopAudio();
+
     const utt = new SpeechSynthesisUtterance(word);
     utt.lang = 'en-US';
     utt.rate = 0.9;
@@ -493,14 +531,16 @@ class EnglishAssistant {
 
   /**
    * 지문 전체 읽어주기 (TTS)
+   * @param {string} text - 읽을 텍스트
+   * @param {object} options - 옵션 (restart: boolean)
    */
-  speakPassage(text) {
+  speakPassage(text, { restart = false } = {}) {
     if (!this.speechSynth) {
       alert('사용하시는 브라우저에서 음성 읽기(SpeechSynthesis)를 지원하지 않습니다.');
       return;
     }
 
-    if (this.isPlayingTTS && !this.isPausedTTS) {
+    if (!restart && this.isPlayingTTS && !this.isPausedTTS) {
       // 일시 정지
       this.speechSynth.pause();
       this.isPausedTTS = true;
@@ -508,7 +548,7 @@ class EnglishAssistant {
       return;
     }
 
-    if (this.isPlayingTTS && this.isPausedTTS) {
+    if (!restart && this.isPlayingTTS && this.isPausedTTS) {
       // 재개
       this.speechSynth.resume();
       this.isPausedTTS = false;
@@ -516,11 +556,11 @@ class EnglishAssistant {
       return;
     }
 
-    // 신규 재생 시작
-    this.speechSynth.cancel();
+    // 신규 재생 시작 (기존 오디오/TTS 정리)
+    this.stopAudio();
 
     // 괄호나 특수문자 정리
-    const cleanText = text.replace(/\[.*?\]/g, '').replace(/[\n\r]+/g, ' ').trim();
+    const cleanText = String(text ?? '').replace(/\[.*?\]/g, '').replace(/[\n\r]+/g, ' ').trim();
     if (!cleanText) return;
 
     this.currentUtterance = new SpeechSynthesisUtterance(cleanText);
@@ -537,13 +577,17 @@ class EnglishAssistant {
     this.currentUtterance.onend = () => {
       this.isPlayingTTS = false;
       this.isPausedTTS = false;
+      this.currentUtterance = null;
       this.updateTTSButtonUI();
     };
 
     this.currentUtterance.onerror = (e) => {
-      console.warn('[EnglishAssistant] TTS 재생 오류:', e);
+      if (e.error !== 'canceled' && e.error !== 'interrupted') {
+        console.warn('[EnglishAssistant] TTS 재생 오류:', e);
+      }
       this.isPlayingTTS = false;
       this.isPausedTTS = false;
+      this.currentUtterance = null;
       this.updateTTSButtonUI();
     };
 
@@ -554,6 +598,12 @@ class EnglishAssistant {
    * 오디오 및 TTS 즉시 정지
    */
   stopAudio() {
+    if (this.currentUtterance) {
+      this.currentUtterance.onstart = null;
+      this.currentUtterance.onend = null;
+      this.currentUtterance.onerror = null;
+      this.currentUtterance = null;
+    }
     if (this.speechSynth) {
       this.speechSynth.cancel();
     }
@@ -577,8 +627,14 @@ class EnglishAssistant {
     });
 
     // 만약 현재 재생 중이었다면 새 배속으로 재시작
-    if (this.isPlayingTTS && this.activeQuestion?.passage) {
-      this.speakPassage(this.activeQuestion.passage);
+    if (this.isPlayingTTS && !this.isPausedTTS) {
+      const textToSpeak = this.activeQuestion?.passage || this.activeQuestion?.question_text || '';
+      if (textToSpeak) {
+        this.speakPassage(textToSpeak, { restart: true });
+      }
+    } else if (this.isPlayingTTS && this.isPausedTTS) {
+      // 일시정지 상태에서 배속 변경 시, 이전 utterance를 정리하여 다음 시작 시 새 배속으로 재생되도록 초기화
+      this.stopAudio();
     }
   }
 
@@ -586,11 +642,12 @@ class EnglishAssistant {
    * TTS 버튼 UI 상태 갱신
    */
   updateTTSButtonUI() {
-    const btn = document.getElementById('btn-eng-tts-play');
+    const btn = document.getElementById('btn-eng-tts-play') || document.getElementById('btn-eng-q-tts');
     if (!btn) return;
 
     const icon = btn.querySelector('.eng-tts-icon');
     const label = btn.querySelector('.eng-tts-label');
+    const isQuestionTTS = btn.id === 'btn-eng-q-tts';
 
     if (this.isPlayingTTS && !this.isPausedTTS) {
       btn.classList.add('playing');
@@ -606,20 +663,25 @@ class EnglishAssistant {
       btn.classList.remove('playing');
       btn.classList.remove('paused');
       if (icon) icon.innerText = '🔊';
-      if (label) label.innerText = '지문 듣기';
+      if (label) label.innerText = isQuestionTTS ? '문장 듣기' : '지문 듣기';
     }
   }
 
   /**
-   * 영문 지문 텍스트 내 단어들을 터치 가능(Touch-to-Define) span으로 래핑
+   * 영문 지문 텍스트 내 단어들을 터치 가능(Touch-to-Define) span으로 래핑 (XSS 방지)
    */
   formatInteractivePassage(text) {
     if (!text) return '';
 
-    // 정규식으로 영단어([a-zA-Z]+)와 나머지(공백, 구두점, 줄바꿈)를 정밀하게 분리
-    return text.replace(/([a-zA-Z]{2,})/g, (match) => {
-      return `<span class="eng-tap-word" data-word="${match}">${match}</span>`;
-    });
+    // 영단어([a-zA-Z]{2,})와 비단어 텍스트(공백, 구두점, 특수문자 등)로 분리 후 안전하게 마크업
+    const parts = String(text).split(/([a-zA-Z]{2,})/g);
+    return parts.map(part => {
+      if (/^[a-zA-Z]{2,}$/.test(part)) {
+        const escapedWord = this.escapeHtml(part);
+        return `<span class="eng-tap-word" data-word="${escapedWord}">${escapedWord}</span>`;
+      }
+      return this.escapeHtml(part);
+    }).join('');
   }
 
   /**
@@ -718,7 +780,7 @@ class EnglishAssistant {
           <span>🇰🇷</span> <strong>지문 전문 해석 & 핵심 해설</strong>
         </div>
         <div class="eng-trans-content" id="eng-trans-content">
-          ${translationText}
+          ${this.escapeHtml(translationText)}
         </div>
       </div>
     ` : '';
@@ -734,12 +796,9 @@ class EnglishAssistant {
         ${translationHtml}
       `;
     } else {
-      // 긴 지문이 없는 문법/어휘 문항일 때 상단에 미니 도우미 바만 배치
-      const existingToolbar = passageBox.querySelector('.eng-passage-toolbar');
-      if (!existingToolbar) {
-        passageBox.style.display = 'block';
-        passageBox.innerHTML = toolbarHtml;
-      }
+      // 긴 지문이 없는 문법/어휘 문항일 때 이전 지문/해석 잔여 DOM을 초기화하고 미니 도우미 바 배치
+      passageBox.style.display = 'block';
+      passageBox.innerHTML = toolbarHtml;
     }
 
     // 이벤트 리스너 연결
