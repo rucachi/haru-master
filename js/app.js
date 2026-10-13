@@ -548,7 +548,7 @@ class DadMonitoringApp {
 
     strengthEl.innerHTML = `• <strong>${strongest.name}(${strongest.rate}%)</strong>: 현재 기간에 가장 안정적인 과목입니다.<br>• 풀이 ${strongest.correct + strongest.wrong}문항 중 ${strongest.correct}문항을 맞혔습니다.`;
     weaknessEl.innerHTML = `• <strong>${weakest.name}(${weakest.rate}%)</strong>: 현재 기간 정답률이 가장 낮은 과목입니다.<br>• 오답 ${weakest.wrong}문항을 풀이 과정과 함께 다시 확인해 보세요.`;
-    coachingEl.innerHTML = `💬 <strong>오늘의 칭찬 & 가이드:</strong><br>"${sName}아, ${strongest.name}은(는) 잘하고 있어! ${weakest.name} 문제는 S펜으로 풀이 단계를 한 줄씩 적어 보자."`;
+    coachingEl.innerHTML = `💬 <strong>오늘의 칭찬 & 가이드:</strong><br>"${sName}아, ${strongest.name}은(는) 잘하고 있어! ${weakest.name} 문제는 풀이 단계를 한 줄씩 정리해 보자."`;
   }
 
   /**

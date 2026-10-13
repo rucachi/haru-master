@@ -3,7 +3,8 @@
  * 첫째 나경이(중3) / 둘째 차혜(중1) 과목 선택, 1일 20문제 학습 및 "더 공부하기(오답 포함)" 엔진
  */
 
-import { dbService } from './firebase-service.js?v=f9e05cf';
+import { dbService } from './firebase-service.js?v=20261013-eng';
+import { englishAssistant } from './english-helper.js?v=20261013-eng';
 
 // 기본 1일 학습 문항 수
 const DAILY_TARGET = 20;
@@ -333,7 +334,6 @@ class StudentApp {
     this.applyTheme();
     this.checkDadCheer();
     this.initSubjectSelector();
-    this.initSPenScratchpad();
     this.initEventListeners();
     await this.loadQuestions(false);
   }
@@ -396,6 +396,7 @@ class StudentApp {
    * @param {boolean} isMoreStudy '더 공부하기' 버튼 여부 (오답 문항 1순위 강제 포함)
    */
   async loadQuestions(isMoreStudy = false) {
+    englishAssistant.stopAudio();
     const requestId = ++this.loadRequestId;
     const compEl = document.getElementById("completion-screen");
     const gridEl = document.getElementById("study-workspace-grid");
@@ -861,17 +862,27 @@ class StudentApp {
     // 지문 (국어, 영어, 탐구 자료 등 - 내부 스크롤 없이 시원하게 표시)
     const passageBox = document.getElementById("q-passage-box");
     if (passageBox) {
-      if (q.passage && q.passage.trim()) {
-        passageBox.style.display = "block";
-        passageBox.innerHTML = `
-          <div class="q-passage-header">
-            <span>📖</span> [ 다음 글을 읽고 물음에 답하시오 ]
-          </div>
-          <div class="q-passage-content">${this.renderMath(q.passage)}</div>
-        `;
+      if (q.subject === "영어") {
+        // 영어 학습 특화 도우미 (TTS 지문/단어 읽기, Free Dictionary API 사전, 단어 터치 팝업, 전문 해석)
+        englishAssistant.attach({
+          question: q,
+          passageBox,
+          studentName: this.config.name
+        });
       } else {
-        passageBox.style.display = "none";
-        passageBox.innerHTML = "";
+        englishAssistant.detach();
+        if (q.passage && q.passage.trim()) {
+          passageBox.style.display = "block";
+          passageBox.innerHTML = `
+            <div class="q-passage-header">
+              <span>📖</span> [ 다음 글을 읽고 물음에 답하시오 ]
+            </div>
+            <div class="q-passage-content">${this.renderMath(q.passage)}</div>
+          `;
+        } else {
+          passageBox.style.display = "none";
+          passageBox.innerHTML = "";
+        }
       }
     }
 
@@ -1029,10 +1040,8 @@ class StudentApp {
   }
 
   nextQuestion() {
+    englishAssistant.stopAudio();
     this.currentIndex++;
-    if (this.clearCanvas) {
-      this.clearCanvas(); // 새 문제로 넘어갈 때 S펜 연습장 자동 정리
-    }
     this.saveProgressLocally();
     this.renderCurrentQuestion();
     this.updateProgress();
@@ -1061,6 +1070,8 @@ class StudentApp {
   }
 
   renderCompletionScreen() {
+    englishAssistant.stopAudio();
+    englishAssistant.detach();
     const compEl = document.getElementById("completion-screen");
     const gridEl = document.getElementById("study-workspace-grid");
 
@@ -1137,7 +1148,6 @@ class StudentApp {
       if (compEl && gridEl) {
         compEl.style.display = "none";
         gridEl.style.display = "grid";
-        if (this.clearCanvas) this.clearCanvas();
       }
       this.loadQuestions(true);
     });
@@ -1229,163 +1239,6 @@ class StudentApp {
       t.style.transition = "opacity 0.3s";
       setTimeout(() => t.remove(), 300);
     }, 2800);
-  }
-
-  // --- [핵심] 좌우 2단 배치 S-Pen & 터치 풀이 연습장 엔진 ---
-  initSPenScratchpad() {
-    const canvas = document.getElementById("spen-canvas");
-    const canvasWrap = document.getElementById("scratchpad-canvas-wrap");
-    const gridEl = document.getElementById("study-workspace-grid");
-    const toggleBtn = document.getElementById("btn-toggle-spen");
-    const collapseBtn = document.getElementById("spen-collapse-btn");
-    const clearBtn = document.getElementById("spen-clear-btn");
-    const eraserBtn = document.getElementById("spen-eraser-btn");
-    const gridBtn = document.getElementById("spen-grid-btn");
-    const widthSelect = document.getElementById("spen-width-select");
-
-    if (!canvas || !canvasWrap) return;
-
-    const ctx = canvas.getContext("2d");
-    let isDrawing = false;
-    let activePointerId = null;
-    let currentColor = "#ffffff";
-    let currentWidth = 4;
-    let isEraserMode = false;
-
-    // 캔버스 크기 자동 리사이징 및 버퍼 비율 맞춤
-    const resizeCanvas = () => {
-      const rect = canvasWrap.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) return;
-
-      const dpr = window.devicePixelRatio || 1;
-      // 이전 그림 보존
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-      const tempCtx = tempCanvas.getContext("2d");
-      tempCtx.drawImage(canvas, 0, 0);
-
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-
-      // 그림 복원
-      ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width / dpr, tempCanvas.height / dpr);
-    };
-
-    setTimeout(resizeCanvas, 150);
-    window.addEventListener("resize", resizeCanvas);
-
-    // 전체 지우기 함수 등록
-    this.clearCanvas = () => {
-      const rect = canvasWrap.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width * (window.devicePixelRatio || 1), rect.height * (window.devicePixelRatio || 1));
-    };
-
-    clearBtn?.addEventListener("click", () => {
-      this.clearCanvas();
-      this.showToast("연습장을 깨끗이 지웠습니다 🧹", "info");
-    });
-
-    // 펜 색상 선택
-    document.querySelectorAll(".color-dot").forEach(dot => {
-      dot.addEventListener("click", () => {
-        document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
-        dot.classList.add("active");
-        currentColor = dot.dataset.color || "#ffffff";
-        isEraserMode = false;
-        eraserBtn?.classList.remove("active");
-        ctx.globalCompositeOperation = "source-over";
-      });
-    });
-
-    // 지우개 모드 토글
-    eraserBtn?.addEventListener("click", () => {
-      isEraserMode = !isEraserMode;
-      eraserBtn.classList.toggle("active", isEraserMode);
-      if (isEraserMode) {
-        ctx.globalCompositeOperation = "destination-out";
-      } else {
-        ctx.globalCompositeOperation = "source-over";
-      }
-    });
-
-    // 선 굵기 조절
-    widthSelect?.addEventListener("change", (e) => {
-      currentWidth = Number(e.target.value) || 4;
-    });
-
-    // 모눈격자 토글
-    gridBtn?.addEventListener("click", () => {
-      canvasWrap.classList.toggle("grid-active");
-      gridBtn.classList.toggle("active");
-    });
-
-    // 화면 분할 접기/펼치기 토글 (우측 연습장 숨기기 / 펼치기)
-    const toggleSplitView = () => {
-      if (!gridEl) return;
-      const isFull = gridEl.classList.toggle("full-question");
-      if (toggleBtn) {
-        toggleBtn.classList.toggle("active", !isFull);
-        toggleBtn.innerHTML = isFull ? `<span>✏️</span> S펜 연습장 열기` : `<span>✏️</span> S펜 연습장`;
-      }
-      if (collapseBtn) {
-        collapseBtn.innerText = isFull ? `◀▶ 연습장 열기` : `◀▶ 접기`;
-      }
-      setTimeout(resizeCanvas, 320);
-    };
-
-    toggleBtn?.addEventListener("click", toggleSplitView);
-    collapseBtn?.addEventListener("click", toggleSplitView);
-
-    // 포인터 위치 계산
-    const getPos = (e) => {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      };
-    };
-
-    // S-Pen 및 터치 드로잉 이벤트 리스너
-    canvas.addEventListener("pointerdown", (e) => {
-      if (isDrawing || e.pointerType !== "pen") return;
-      e.preventDefault();
-      isDrawing = true;
-      activePointerId = e.pointerId;
-      canvas.setPointerCapture(e.pointerId);
-      const pos = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-
-      // 필압 감지 지원 (S-Pen pressure)
-      const pressureMultiplier = (e.pressure && e.pressure > 0) ? (e.pressure * 1.5) : 1;
-      ctx.lineWidth = isEraserMode ? currentWidth * 4 : currentWidth * pressureMultiplier;
-      ctx.strokeStyle = currentColor;
-    });
-
-    canvas.addEventListener("pointermove", (e) => {
-      if (!isDrawing || e.pointerId !== activePointerId) return;
-      e.preventDefault();
-      const pos = getPos(e);
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-    });
-
-    const stopDrawing = (e) => {
-      if (!isDrawing || (e && e.pointerId !== activePointerId)) return;
-      ctx.closePath();
-      if (e && canvas.hasPointerCapture(e.pointerId)) {
-        canvas.releasePointerCapture(e.pointerId);
-      }
-      activePointerId = null;
-      isDrawing = false;
-    };
-
-    canvas.addEventListener("pointerup", stopDrawing);
-    canvas.addEventListener("pointercancel", stopDrawing);
   }
 
   triggerConfetti() {

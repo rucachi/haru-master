@@ -15,7 +15,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 
   <!-- 학생 태블릿 전용 스타일 -->
-  <link rel="stylesheet" href="css/student.css">
+  <link rel="stylesheet" href="css/student.css?v=20261013-eng">
 </head>
 <body class="theme-chahye">
 
@@ -32,11 +32,6 @@
     </div>
 
     <div class="student-header-actions">
-      <!-- S-Pen 연습장 열기 버튼 -->
-      <button type="button" class="btn-spen-toggle" id="btn-toggle-spen" title="S펜 풀이 연습장 열기">
-        <span>✏️</span> S펜 연습장
-      </button>
-
       <!-- 클라우드 연동 상태 -->
       <div class="sync-badge">
         <span class="sync-dot"></span>
@@ -66,16 +61,16 @@
     </div>
   </div>
 
-  <!-- 메인 학습 뷰어 (좌: 문제, 우: S-Pen 풀이 연습장 2단 분할 레이아웃) -->
+  <!-- 메인 학습 뷰어 -->
   <main class="student-main-content" id="student-main-content">
     
     <!-- 20문제 학습 완료 축하 화면 (완료 시 노출) -->
     <div id="completion-screen" style="display: none; width: 100%;"></div>
 
-    <!-- 좌우 2단 분할 학습 워크스페이스 -->
+    <!-- 학습 워크스페이스 -->
     <div class="study-workspace-grid" id="study-workspace-grid">
 
-      <!-- [좌측 50%] 문제 및 답안 선택 패널 -->
+      <!-- 문제 및 답안 선택 패널 -->
       <section class="study-pane-left" id="question-pane">
         <div class="q-card" id="q-card">
           <div class="q-meta-row">
@@ -122,42 +117,6 @@
         </div>
       </section>
 
-      <!-- [우측 50%] S-Pen & 터치 풀이 연습장 패널 -->
-      <section class="study-pane-right" id="spen-pane">
-        <div class="spen-workspace-card">
-          <!-- 상단 툴바 -->
-          <div class="scratchpad-toolbar">
-            <div class="scratchpad-tools-left">
-              <span class="scratchpad-title">✏️ S펜 풀이장</span>
-              <!-- 색상 팔레트 -->
-              <div class="color-dot active" data-color="#ffffff" title="화이트"></div>
-              <div class="color-dot" data-color="#fef08a" title="옐로우"></div>
-              <div class="color-dot" data-color="#38bdf8" title="네온블루"></div>
-              <div class="color-dot" data-color="#34d399" title="에메랄드"></div>
-              <div class="color-dot" data-color="#f43f5e" title="레드"></div>
-              <!-- 지우개 -->
-              <button type="button" class="tool-btn eraser-btn" id="spen-eraser-btn" title="지우개 모드">🧹 지우개</button>
-              <!-- 굵기 -->
-              <select id="spen-width-select" class="tool-select" title="선 굵기">
-                <option value="2">가는선 (2px)</option>
-                <option value="4" selected>보통 (4px)</option>
-                <option value="8">굵은선 (8px)</option>
-              </select>
-              <!-- 모눈격자 토글 -->
-              <button type="button" class="tool-btn" id="spen-grid-btn" title="모눈종이 격자 토글">📐 모눈격자</button>
-            </div>
-            <div class="scratchpad-tools-right">
-              <button type="button" class="tool-btn danger" id="spen-clear-btn" title="풀이 전체 지우기">🗑️ 싹 지우기</button>
-              <button type="button" class="tool-btn" id="spen-collapse-btn" title="화면 분할 접기/펼치기">◀▶ 접기</button>
-            </div>
-          </div>
-          <!-- 캔버스 드로잉 영역 -->
-          <div class="scratchpad-canvas-wrap" id="scratchpad-canvas-wrap">
-            <canvas class="scratchpad-canvas" id="spen-canvas"></canvas>
-          </div>
-        </div>
-      </section>
-
     </div>
   </main>
 
@@ -172,7 +131,7 @@
   </script>
 
   <!-- 학생 전용 로직 모듈 -->
-  <script type="module" src="js/student-app.js?v=f9e05cf"></script>
+  <script type="module" src="js/student-app.js?v=20261013-eng"></script>
 
 </body>
 </html>

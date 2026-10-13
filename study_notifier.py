@@ -289,7 +289,7 @@ def send_weekly_report_email_service():
         <div class="ai-box">
           🤖 <strong>AI 코칭 조언:</strong><br>
           • <strong>취약 단원:</strong> 과학 6단원 [에너지 전환과 보존]의 역학적 에너지 계산에서 수치 단위 변환 실수가 보입니다.<br>
-          • <strong>아빠의 팁:</strong> "나경아, 공식은 완벽하니 S펜 연습장에 풀이 식 딱 한 줄만 쓰고 계산해봐!"라고 격려해 주시면 바로 만점 궤도에 진입합니다.
+          • <strong>아빠의 팁:</strong> "나경아, 공식은 완벽하니 풀이 식을 딱 한 줄씩 정리하고 계산해봐!"라고 격려해 주시면 바로 만점 궤도에 진입합니다.
         </div>
       </div>
 
